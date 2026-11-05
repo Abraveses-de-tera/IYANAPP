@@ -166,17 +166,25 @@
 
       <!-- Cancelled Session Banner -->
       <div id="session-cancelled-banner" class="session-cancelled-card" style="display: none;">
-        <div style="font-size: 2.2rem; margin-bottom: 6px;">🏖️</div>
-        <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 4px;">Día sin entrenamiento</h4>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; max-width: 320px; margin-left: auto; margin-right: auto;">
-          Este día no se realiza entrenamiento (día libre / suspendido). No cuenta en las estadísticas ni penaliza a las jugadoras.
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">🚫</div>
+        <h4 style="color: #FFFFFF; font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;">Día sin entrenamiento (Día Libre)</h4>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px; max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          Este día no se realiza entrenamiento (sesión cancelada / día libre). No computa en las estadísticas ni penaliza el % de asistencia de las jugadoras.
         </p>
-        <div class="form-group" style="margin-bottom: 14px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto;">
-          <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Motivo de cancelación (opcional):</label>
+
+        <!-- Motive badge (visible in both Consulta and Coach modes if motive exists) -->
+        <div id="session-cancel-reason-badge" style="display: none; margin: 0 auto 14px auto; max-width: 340px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 10px 14px; color: #F59E0B; font-weight: 700; font-size: 0.88rem; text-align: center;">
+          📝 <span id="session-cancel-reason-text">Festivo</span>
+        </div>
+
+        <!-- Coach edit motive form -->
+        <div id="session-cancel-reason-edit-group" class="form-group" style="margin-bottom: 14px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto;">
+          <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Editar motivo de cancelación:</label>
           <input type="text" id="input-session-cancel-reason" class="form-input" placeholder="Ej. Festivo, descanso, pabellón cerrado...">
         </div>
-        <button id="btn-restore-training" class="btn-block-action accent-green" style="max-width: 260px; margin: 0 auto;">
-          ✅ Restablecer entrenamiento
+
+        <button id="btn-restore-training" class="btn-block-action accent-green" style="max-width: 280px; margin: 0 auto;">
+          ✅ Restablecer día de entrenamiento
         </button>
       </div>
 

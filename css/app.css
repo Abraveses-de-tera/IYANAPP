@@ -427,15 +427,17 @@ body {
 }
 
 .cal-day.type-cancelled {
-  border-bottom: 2px dashed rgba(255, 255, 255, 0.2) !important;
-  opacity: 0.6;
+  border-bottom: 2px dashed rgba(239, 68, 68, 0.45) !important;
+  background: rgba(239, 68, 68, 0.05);
+  opacity: 0.8;
 }
 
 .cal-day.type-cancelled .cal-session-badge,
 .cal-session-badge.badge-cancelled {
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: #F87171 !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+  border: 1px dashed rgba(239, 68, 68, 0.4) !important;
+  font-weight: 800;
 }
 
 .cal-attendance-indicator.status-cancelled {

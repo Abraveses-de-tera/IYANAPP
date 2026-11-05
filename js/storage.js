@@ -267,6 +267,8 @@ class StorageEngine {
       ...existing,
       ...sessionData,
       date: dateStr,
+      cancelled: Boolean(sessionData.cancelled),
+      type: sessionData.type || (sessionData.cancelled ? 'none' : 'training'),
       records: { ...(existing.records || {}), ...(sessionData.records || {}) },
       playerNotes: { ...(existing.playerNotes || {}), ...(sessionData.playerNotes || {}) },
       updatedAt: Date.now()
@@ -474,24 +476,50 @@ class StorageEngine {
         let changed = false;
 
         if (remoteData.players && Array.isArray(remoteData.players) && remoteData.players.length > 0) {
-          this.players = this.sortPlayersList(remoteData.players);
-          localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(this.players));
-          changed = true;
+          const sorted = this.sortPlayersList(remoteData.players);
+          if (JSON.stringify(sorted) !== JSON.stringify(this.players)) {
+            this.players = sorted;
+            localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(this.players));
+            changed = true;
+          }
         }
 
         // Gather sessions from remote
         const incomingSessions = {};
         if (remoteData.sessions && typeof remoteData.sessions === 'object') {
-          Object.assign(incomingSessions, remoteData.sessions);
-        }
-        for (const k in remoteData) {
-          if (k.startsWith('sessions.') && remoteData[k]) {
-            const dStr = k.replace('sessions.', '');
-            incomingSessions[dStr] = remoteData[k];
+          for (const dStr in remoteData.sessions) {
+            const s = remoteData.sessions[dStr];
+            if (s && typeof s === 'object') {
+              incomingSessions[dStr] = s;
+            }
           }
         }
 
-        // Only merge if remote has sessions
+        // Clean up legacy rogue fields with dots (sessions.YYYY-MM-DD)
+        const rogueKeys = [];
+        for (const k in remoteData) {
+          if (k.startsWith('sessions.') && remoteData[k]) {
+            const dStr = k.replace('sessions.', '');
+            rogueKeys.push(k);
+            const rogueS = remoteData[k];
+            const existing = incomingSessions[dStr];
+            if (!existing || (rogueS.updatedAt || 0) > (existing.updatedAt || 0)) {
+              incomingSessions[dStr] = rogueS;
+            }
+          }
+        }
+
+        if (rogueKeys.length > 0 && typeof firebase !== 'undefined') {
+          try {
+            const cleanupObj = {};
+            rogueKeys.forEach(rk => {
+              cleanupObj[new firebase.firestore.FieldPath(rk)] = firebase.firestore.FieldValue.delete();
+            });
+            teamDocRef.update(cleanupObj).catch(() => {});
+          } catch (e) {}
+        }
+
+        // Merge incoming sessions with local
         if (Object.keys(incomingSessions).length > 0) {
           const merged = { ...this.sessions };
           let sessionsUpdated = false;
@@ -499,8 +527,12 @@ class StorageEngine {
           for (const dStr in incomingSessions) {
             const remoteS = incomingSessions[dStr];
             const localS = merged[dStr];
-            // If remote is strictly newer or local doesn't have it, update
-            if (!localS || (remoteS.updatedAt || 0) > (localS.updatedAt || 0)) {
+
+            const remoteTime = remoteS.updatedAt || 0;
+            const localTime = localS ? (localS.updatedAt || 0) : 0;
+            const cancellationChanged = !localS || (Boolean(remoteS.cancelled) !== Boolean(localS.cancelled)) || (remoteS.type !== localS.type);
+
+            if (!localS || remoteTime >= localTime || cancellationChanged) {
               merged[dStr] = remoteS;
               sessionsUpdated = true;
             }
@@ -513,9 +545,8 @@ class StorageEngine {
           }
         }
 
-        if (changed) {
-          this.notify('firebase_sync', true);
-        }
+        // Always notify on remote sync so views update immediately across all devices
+        this.notify('firebase_sync', true);
       } else {
         // Document does not exist yet; populate initial data to Firestore
         this.syncAllToFirebase();
@@ -534,11 +565,20 @@ class StorageEngine {
       if (type === 'players') {
         await teamDocRef.set({ players: this.players, lastUpdated: Date.now() }, { merge: true });
       } else if (type === 'session') {
-        // Store the full sessions map directly in Firestore
+        const now = Date.now();
+        // 1. Store the full sessions map directly in Firestore
         await teamDocRef.set({
           sessions: this.sessions,
-          lastUpdated: Date.now()
+          lastUpdated: now
         }, { merge: true });
+
+        // 2. Also directly update specific session path atomically
+        if (data && data.date) {
+          const specificUpdate = {};
+          specificUpdate[`sessions.${data.date}`] = data;
+          specificUpdate['lastUpdated'] = now;
+          await teamDocRef.update(specificUpdate).catch(() => {});
+        }
       }
       this.settings.syncStatus = 'synced';
     } catch (err) {

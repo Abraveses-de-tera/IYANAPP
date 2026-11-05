@@ -1,5 +1,5 @@
 // Service Worker for PLANTA 14 FSF Attendance PWA
-const CACHE_NAME = 'planta14-fsf-v10';
+const CACHE_NAME = 'planta14-fsf-v11';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

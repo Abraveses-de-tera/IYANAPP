@@ -104,6 +104,9 @@
       lockIcon.textContent = '🔒';
       lockText.textContent = 'Consulta';
     }
+    if (currentActiveView === 'view-day') {
+      renderDayView(window.calendarEngine.selectedDate);
+    }
   }
 
   function requireCoachAuth(actionCallback) {
@@ -483,6 +486,7 @@
       };
     }
 
+    const isUnlocked = se.isUnlocked();
     const isCancelled = session && (session.type === 'none' || session.cancelled === true);
     const isMatch = session.type === 'match';
 
@@ -493,18 +497,45 @@
       if (isCancelled) {
         btnToggleCancelTraining.classList.add('is-cancelled');
         if (btnCancelTrainingIcon) btnCancelTrainingIcon.textContent = '✅';
-        if (btnCancelTrainingText) btnCancelTrainingText.textContent = 'Restablecer día de entrenamiento';
+        if (btnCancelTrainingText) btnCancelTrainingText.textContent = isUnlocked ? 'Restablecer día de entrenamiento' : 'Entrenamiento Cancelado (Día Libre)';
       } else {
         btnToggleCancelTraining.classList.remove('is-cancelled');
         if (btnCancelTrainingIcon) btnCancelTrainingIcon.textContent = '🚫';
-        if (btnCancelTrainingText) btnCancelTrainingText.textContent = 'Quitar día de entrenamiento (No hay entreno)';
+        if (btnCancelTrainingText) btnCancelTrainingText.textContent = isUnlocked ? 'Quitar día de entrenamiento (No hay entreno)' : 'Día de entrenamiento';
       }
     }
 
     // Toggle cancelled banner vs player list & bulk actions
     if (sessionCancelledBanner) {
       sessionCancelledBanner.style.display = isCancelled ? 'block' : 'none';
+
+      const reasonBadge = document.getElementById('session-cancel-reason-badge');
+      const reasonTextSpan = document.getElementById('session-cancel-reason-text');
+      const reasonEditGroup = document.getElementById('session-cancel-reason-edit-group');
+      const rawReason = (session.notes || '').trim();
+
+      if (reasonBadge && reasonTextSpan) {
+        if (rawReason) {
+          reasonTextSpan.textContent = `Motivo: ${rawReason}`;
+          reasonBadge.style.display = 'block';
+        } else {
+          reasonBadge.style.display = 'none';
+        }
+      }
+
+      if (reasonEditGroup) {
+        reasonEditGroup.style.display = isUnlocked ? 'block' : 'none';
+      }
+
+      if (inputSessionCancelReason) {
+        inputSessionCancelReason.value = rawReason;
+      }
+
+      if (btnRestoreTraining) {
+        btnRestoreTraining.style.display = isUnlocked ? 'block' : 'none';
+      }
     }
+
     const quickActionsRow = document.querySelector('.quick-attendance-actions');
     if (quickActionsRow) {
       quickActionsRow.style.display = isCancelled ? 'none' : 'grid';
@@ -513,8 +544,10 @@
       sessionPlayerList.style.display = isCancelled ? 'none' : 'flex';
     }
 
-    if (inputSessionCancelReason) {
-      inputSessionCancelReason.value = session.notes || '';
+    // Hide session details accordion when cancelled to avoid clutter
+    const sessionDetailsSection = document.getElementById('session-details-collapsible');
+    if (sessionDetailsSection) {
+      sessionDetailsSection.style.display = isCancelled ? 'none' : 'block';
     }
 
     // Update session type badge
@@ -1549,14 +1582,18 @@
 
   // Real-time synchronization event listener from storageEngine
   window.storageEngine.subscribe((eventType, data) => {
-    if (eventType === 'firebase_sync') {
-      if (currentActiveView === 'view-calendar') renderCalendar();
-      else if (currentActiveView === 'view-day') renderDayView(window.calendarEngine.selectedDate);
-      else if (currentActiveView === 'view-matrix') renderMatrix();
-      else if (currentActiveView === 'view-stats') renderStats();
+    if (eventType === 'firebase_sync' || eventType === 'session') {
+      if (currentActiveView === 'view-calendar') {
+        renderCalendar();
+      } else if (currentActiveView === 'view-day') {
+        renderDayView(window.calendarEngine.selectedDate);
+      } else if (currentActiveView === 'view-matrix') {
+        renderMatrix();
+      } else if (currentActiveView === 'view-stats') {
+        renderStats();
+      }
     }
     updateSyncIndicator();
-    updateAuthUI();
   });
 
   // ==========================================================================
