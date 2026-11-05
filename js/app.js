@@ -325,15 +325,29 @@
         dot.className = `cal-attendance-indicator status-${attendanceInfo.status}`;
         dayDiv.appendChild(dot);
 
-        // Click handler to select date
+        // Fast Double Tap (Mobile) & Double Click (Desktop) detector
+        let lastDayTap = 0;
+
         dayDiv.addEventListener('click', () => {
+          const now = Date.now();
+          const timeDiff = now - lastDayTap;
+
+          if (timeDiff > 0 && timeDiff < 380) {
+            // Double tap / double click detected! Opens day view directly
+            ce.selectedDate = cell.dateStr;
+            switchView('view-day');
+            lastDayTap = 0;
+            return;
+          }
+
+          lastDayTap = now;
           ce.selectedDate = cell.dateStr;
           updateSelectedDayPreview();
           document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
           dayDiv.classList.add('selected');
         });
 
-        // Double click or direct tap opens session if already selected
+        // Double click for desktop
         dayDiv.addEventListener('dblclick', () => {
           ce.selectedDate = cell.dateStr;
           switchView('view-day');
@@ -908,12 +922,12 @@
         const s = allSessions[d];
         const status = s.records ? s.records[p.id] : undefined;
         if (status === true) {
-          html += '<td class="matrix-cell-yes" title="Presente">✔</td>';
+          html += '<td class="matrix-cell-yes" title="Presente"><span class="matrix-badge-yes">✔</span></td>';
         } else if (status === false) {
           const note = s.playerNotes && s.playerNotes[p.id] ? s.playerNotes[p.id] : 'Ausente';
-          html += `<td class="matrix-cell-no" title="${note}">✖</td>`;
+          html += `<td class="matrix-cell-no" title="${note}"><span class="matrix-badge-no">✖</span></td>`;
         } else {
-          html += '<td class="matrix-cell-pending">-</td>';
+          html += '<td class="matrix-cell-pending"><span class="matrix-badge-pending">-</span></td>';
         }
       });
 
