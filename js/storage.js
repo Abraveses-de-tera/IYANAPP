@@ -75,16 +75,16 @@ class StorageEngine {
       this.saveSettings(this.settings);
     }
 
-    // 2. Load players
+    // 2. Load players (always sorted by dorsal menor a mayor)
     const storedPlayers = localStorage.getItem(STORAGE_KEYS.PLAYERS);
     if (storedPlayers) {
       try {
-        this.players = JSON.parse(storedPlayers);
+        this.players = this.sortPlayersList(JSON.parse(storedPlayers));
       } catch (e) {
-        this.players = [...DEFAULT_PLAYERS];
+        this.players = this.sortPlayersList(DEFAULT_PLAYERS);
       }
     } else {
-      this.players = [...DEFAULT_PLAYERS];
+      this.players = this.sortPlayersList(DEFAULT_PLAYERS);
       this.savePlayers(this.players);
     }
 
@@ -133,15 +133,40 @@ class StorageEngine {
   }
 
   // --- Players Management ---
+  sortPlayersList(list) {
+    if (!Array.isArray(list)) return [];
+    return [...list].sort((a, b) => {
+      const hasA = a.number !== null && a.number !== undefined && a.number !== '' && !isNaN(parseInt(a.number, 10));
+      const hasB = b.number !== null && b.number !== undefined && b.number !== '' && !isNaN(parseInt(b.number, 10));
+      if (hasA && hasB) {
+        const diff = parseInt(a.number, 10) - parseInt(b.number, 10);
+        if (diff !== 0) return diff;
+      } else if (hasA && !hasB) {
+        return -1;
+      } else if (!hasA && hasB) {
+        return 1;
+      }
+      return (a.name || '').localeCompare(b.name || '', 'es');
+    });
+  }
+
+  findPlayerByNumber(number, excludePlayerId = null) {
+    if (number === null || number === undefined || number === '') return null;
+    const num = parseInt(number, 10);
+    if (isNaN(num)) return null;
+    return this.players.find(p => {
+      if (excludePlayerId && p.id === excludePlayerId) return false;
+      return p.number !== null && p.number !== undefined && parseInt(p.number, 10) === num;
+    }) || null;
+  }
+
   getPlayers(includeInactive = false) {
-    if (includeInactive) {
-      return [...this.players];
-    }
-    return this.players.filter(p => p.active !== false);
+    const list = includeInactive ? this.players : this.players.filter(p => p.active !== false);
+    return this.sortPlayersList(list);
   }
 
   getAllPlayers() {
-    return [...this.players];
+    return this.sortPlayersList(this.players);
   }
 
   getPlayerById(id) {
@@ -149,7 +174,7 @@ class StorageEngine {
   }
 
   savePlayers(newPlayers) {
-    this.players = newPlayers;
+    this.players = this.sortPlayersList(newPlayers);
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(this.players));
     this.syncToFirebase('players', this.players);
     this.notify('players', this.players);
@@ -159,11 +184,19 @@ class StorageEngine {
     const trimmed = name.trim();
     if (!trimmed) return null;
 
+    const parsedNum = (number !== null && number !== undefined && number !== '') ? parseInt(number, 10) : null;
+    if (parsedNum !== null) {
+      const duplicate = this.findPlayerByNumber(parsedNum);
+      if (duplicate) {
+        throw new Error(`El dorsal #${parsedNum} ya está en uso por ${duplicate.name}.`);
+      }
+    }
+
     const id = 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
     const newPlayer = {
       id,
       name: trimmed,
-      number: number ? parseInt(number, 10) : null,
+      number: parsedNum,
       position: position || 'Jugadora',
       active: true,
       createdAt: Date.now()
@@ -175,6 +208,15 @@ class StorageEngine {
   }
 
   updatePlayer(id, data) {
+    if (data.number !== undefined && data.number !== null && data.number !== '') {
+      const parsedNum = parseInt(data.number, 10);
+      const duplicate = this.findPlayerByNumber(parsedNum, id);
+      if (duplicate) {
+        throw new Error(`El dorsal #${parsedNum} ya está en uso por ${duplicate.name}.`);
+      }
+      data.number = parsedNum;
+    }
+
     const updated = this.players.map(p => {
       if (p.id === id) {
         return { ...p, ...data };
@@ -432,7 +474,7 @@ class StorageEngine {
         let changed = false;
 
         if (remoteData.players && Array.isArray(remoteData.players) && remoteData.players.length > 0) {
-          this.players = remoteData.players;
+          this.players = this.sortPlayersList(remoteData.players);
           localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(this.players));
           changed = true;
         }

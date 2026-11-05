@@ -1043,19 +1043,19 @@
       return;
     }
 
-    stats.playerStats.forEach((ps, idx) => {
+    stats.playerStats.forEach((ps) => {
       const card = document.createElement('div');
       card.className = 'player-stat-card';
 
       const colorClass = ste.getRateColorClass(ps.totalRate);
-      const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+      const dorsalText = (ps.player.number !== null && ps.player.number !== undefined) ? `#${ps.player.number}` : '-';
 
       card.innerHTML = `
         <div class="stat-card-header">
           <div class="stat-player-name">
-            <span class="stat-badge-rank">${medal}</span>
+            <span class="stat-badge-rank" style="font-weight:900; color:var(--accent-training); min-width:28px; text-align:center;">${dorsalText}</span>
             <span>${ps.player.name}</span>
-            ${ps.player.number ? `<span style="font-size:0.75rem; color:var(--text-muted)">#${ps.player.number}</span>` : ''}
+            <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:4px;">${ps.player.position ? `&bull; ${ps.player.position}` : ''}</span>
           </div>
           <div class="stat-total-rate ${colorClass}">
             ${ps.totalRate}%
@@ -1101,7 +1101,7 @@
 
   function renderRosterList() {
     const se = window.storageEngine;
-    const players = se.getPlayers(true); // Include inactive
+    const players = se.getPlayers(true); // Always ordered by dorsal ascending (menor a mayor)
     rosterManageList.innerHTML = '';
 
     players.forEach(p => {
@@ -1109,15 +1109,22 @@
       item.className = 'roster-manage-item';
       if (!p.active) item.classList.add('inactive');
 
+      const dorsalLabel = (p.number !== null && p.number !== undefined) ? `#${p.number}` : '-';
+
       item.innerHTML = `
-        <div>
-          <strong style="color: ${p.active ? 'var(--text-main)' : 'var(--text-muted)'}; font-size: 0.9rem;">
-            ${p.name}
-          </strong>
-          <span style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 6px;">
-            ${p.number ? `#${p.number} &bull; ` : ''}${p.position || 'Jugadora'}
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 24px; padding: 0 6px; border-radius: 6px; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.35); color: var(--accent-training); font-size: 0.8rem; font-weight: 800;">
+            ${dorsalLabel}
           </span>
-          ${!p.active ? '<span style="font-size: 0.65rem; color: var(--accent-danger); margin-left: 4px;">(Baja)</span>' : ''}
+          <div>
+            <strong style="color: ${p.active ? 'var(--text-main)' : 'var(--text-muted)'}; font-size: 0.9rem;">
+              ${p.name}
+            </strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 6px;">
+              &bull; ${p.position || 'Jugadora'}
+            </span>
+            ${!p.active ? '<span style="font-size: 0.65rem; color: var(--accent-danger); margin-left: 4px;">(Baja)</span>' : ''}
+          </div>
         </div>
         <div class="roster-manage-actions">
           <button class="btn-icon-small btn-edit-player" data-player-id="${p.id}" title="Editar jugadora">✏️</button>
@@ -1147,6 +1154,9 @@
           se.togglePlayerActive(pId);
           renderRosterList();
           showToast('Estado de jugadora actualizado');
+          if (currentActiveView === 'view-day') renderDayView(window.calendarEngine.selectedDate);
+          if (currentActiveView === 'view-matrix') renderMatrix();
+          if (currentActiveView === 'view-stats') renderStats();
         });
       });
     });
@@ -1159,6 +1169,25 @@
   const inputPlayerNumber = document.getElementById('input-player-number');
   const inputPlayerPosition = document.getElementById('input-player-position');
   const btnSavePlayerData = document.getElementById('btn-save-player-data');
+  const playerNumberWarning = document.getElementById('player-number-warning');
+
+  // Real-time dorsal duplication check
+  inputPlayerNumber.addEventListener('input', () => {
+    const raw = inputPlayerNumber.value.trim();
+    if (!raw) {
+      if (playerNumberWarning) playerNumberWarning.style.display = 'none';
+      return;
+    }
+    const num = parseInt(raw, 10);
+    const curId = editPlayerId.value;
+    const duplicate = window.storageEngine.findPlayerByNumber(num, curId);
+    if (duplicate && playerNumberWarning) {
+      playerNumberWarning.textContent = `⚠️ El dorsal ${num} ya está en uso por ${duplicate.name}. Selecciona otro número de dorsal.`;
+      playerNumberWarning.style.display = 'block';
+    } else if (playerNumberWarning) {
+      playerNumberWarning.style.display = 'none';
+    }
+  });
 
   btnAddPlayer.addEventListener('click', () => {
     requireCoachAuth(() => {
@@ -1167,6 +1196,7 @@
       inputPlayerName.value = '';
       inputPlayerNumber.value = '';
       inputPlayerPosition.value = 'Ala';
+      if (playerNumberWarning) playerNumberWarning.style.display = 'none';
       modalPlayerEdit.classList.add('active');
     });
   });
@@ -1177,8 +1207,9 @@
     playerModalHeading.textContent = `Editar: ${p.name}`;
     editPlayerId.value = p.id;
     inputPlayerName.value = p.name;
-    inputPlayerNumber.value = p.number || '';
+    inputPlayerNumber.value = (p.number !== null && p.number !== undefined) ? p.number : '';
     inputPlayerPosition.value = p.position || 'Ala';
+    if (playerNumberWarning) playerNumberWarning.style.display = 'none';
     modalPlayerEdit.classList.add('active');
   }
 
@@ -1189,21 +1220,54 @@
       return;
     }
 
-    const number = inputPlayerNumber.value ? parseInt(inputPlayerNumber.value, 10) : null;
+    const rawNumber = inputPlayerNumber.value.trim();
+    const number = rawNumber !== '' ? parseInt(rawNumber, 10) : null;
     const position = inputPlayerPosition.value;
     const id = editPlayerId.value;
     const se = window.storageEngine;
 
-    if (id) {
-      se.updatePlayer(id, { name, number, position });
-      showToast(`Jugadora ${name} actualizada`);
-    } else {
-      se.addPlayer(name, number, position);
-      showToast(`Jugadora ${name} añadida`);
+    // Validate unique dorsal
+    if (number !== null) {
+      if (isNaN(number) || number < 0 || number > 99) {
+        alert('Por favor, introduce un número de dorsal válido entre 0 y 99.');
+        return;
+      }
+
+      const duplicate = se.findPlayerByNumber(number, id);
+      if (duplicate) {
+        const errorMsg = `Ese dorsal (${number}) ya está en uso por ${duplicate.name}. Por favor, selecciona otro número de dorsal.`;
+        alert(errorMsg);
+        showToast(`⚠️ Ese dorsal (${number}) ya está en uso. Selecciona otro número de dorsal.`, 4500);
+        if (playerNumberWarning) {
+          playerNumberWarning.textContent = `⚠️ Ese dorsal (${number}) ya está en uso por ${duplicate.name}. Selecciona otro número de dorsal.`;
+          playerNumberWarning.style.display = 'block';
+        }
+        inputPlayerNumber.focus();
+        return;
+      }
     }
 
-    modalPlayerEdit.classList.remove('active');
-    renderRosterList();
+    try {
+      if (id) {
+        se.updatePlayer(id, { name, number, position });
+        showToast(`Jugadora ${name} actualizada (#${number || '-'})`);
+      } else {
+        se.addPlayer(name, number, position);
+        showToast(`Jugadora ${name} añadida (#${number || '-'})`);
+      }
+
+      modalPlayerEdit.classList.remove('active');
+      if (playerNumberWarning) playerNumberWarning.style.display = 'none';
+      renderRosterList();
+
+      // Refresh all views so new order (menor a mayor) is reflected everywhere immediately
+      if (currentActiveView === 'view-calendar') renderCalendar();
+      if (currentActiveView === 'view-day') renderDayView(window.calendarEngine.selectedDate);
+      if (currentActiveView === 'view-matrix') renderMatrix();
+      if (currentActiveView === 'view-stats') renderStats();
+    } catch (err) {
+      alert(err.message || 'Error al guardar la jugadora.');
+    }
   });
 
   // Export handlers

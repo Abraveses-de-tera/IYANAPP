@@ -109,10 +109,19 @@ class StatsEngine {
       };
     });
 
-    // Sort by total attendance rate descending, then attendedTotal
+    // Sort by dorsal number ascending (menor a mayor)
     playerStats.sort((a, b) => {
-      if (b.totalRate !== a.totalRate) return b.totalRate - a.totalRate;
-      return b.attendedTotal - a.attendedTotal;
+      const hasA = a.player.number !== null && a.player.number !== undefined && a.player.number !== '' && !isNaN(parseInt(a.player.number, 10));
+      const hasB = b.player.number !== null && b.player.number !== undefined && b.player.number !== '' && !isNaN(parseInt(b.player.number, 10));
+      if (hasA && hasB) {
+        const diff = parseInt(a.player.number, 10) - parseInt(b.player.number, 10);
+        if (diff !== 0) return diff;
+      } else if (hasA && !hasB) {
+        return -1;
+      } else if (!hasA && hasB) {
+        return 1;
+      }
+      return (a.player.name || '').localeCompare(b.player.name || '', 'es');
     });
 
     // Compute team overall averages
