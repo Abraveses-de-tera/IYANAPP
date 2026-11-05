@@ -28,7 +28,6 @@
   const modalPlayerNote = document.getElementById('modal-player-note');
   const modalPlayerEdit = document.getElementById('modal-player-edit');
   const modalWhatsapp = document.getElementById('modal-whatsapp-share');
-  const modalFirebase = document.getElementById('modal-firebase');
 
   // State
   let currentActiveView = 'view-calendar';
@@ -1031,12 +1030,10 @@
   const btnImportJsonTrigger = document.getElementById('btn-import-json-trigger');
   const inputImportJson = document.getElementById('input-import-json');
   const btnChangePinPrompt = document.getElementById('btn-change-pin-prompt');
-  const btnOpenFirebaseModal = document.getElementById('btn-open-firebase-modal');
-  const firebaseStatusBadge = document.getElementById('firebase-status-badge');
 
   function renderSettings() {
     renderRosterList();
-    updateFirebaseBadge();
+    updateSyncIndicator();
   }
 
   function renderRosterList() {
@@ -1207,71 +1204,18 @@
     });
   });
 
-  // Firebase Config Modal
-  const inputFirebaseJson = document.getElementById('input-firebase-json');
-  const btnSaveFirebaseConfig = document.getElementById('btn-save-firebase-config');
-  const btnDisconnectFirebase = document.getElementById('btn-disconnect-firebase');
-
-  btnOpenFirebaseModal.addEventListener('click', () => {
-    const currentConfig = window.storageEngine.settings.firebaseConfig;
-    inputFirebaseJson.value = currentConfig ? JSON.stringify(currentConfig, null, 2) : '';
-    modalFirebase.classList.add('active');
-  });
-
-  btnSaveFirebaseConfig.addEventListener('click', () => {
-    requireCoachAuth(() => {
-      const raw = inputFirebaseJson.value.trim();
-      if (!raw) {
-        alert('Pega el objeto JSON de configuración de Firebase.');
-        return;
-      }
-      try {
-        const config = JSON.parse(raw);
-        const success = window.storageEngine.initFirebase(config);
-        if (success) {
-          window.storageEngine.settings.firebaseConfig = config;
-          window.storageEngine.saveSettings(window.storageEngine.settings);
-          showToast('✅ Conectado a Firebase Firestore');
-          modalFirebase.classList.remove('active');
-          updateFirebaseBadge();
-        } else {
-          alert('No se pudo conectar a Firebase. Revisa las claves o la conexión a internet.');
-        }
-      } catch (e) {
-        alert('Error de formato JSON: ' + e.message);
-      }
-    });
-  });
-
-  btnDisconnectFirebase.addEventListener('click', () => {
-    requireCoachAuth(() => {
-      window.storageEngine.settings.firebaseConfig = null;
-      window.storageEngine.settings.syncStatus = 'local';
-      window.storageEngine.saveSettings(window.storageEngine.settings);
-      window.storageEngine.firebaseInitialized = false;
-      showToast('Firebase desconectado. Modo Local activo.');
-      modalFirebase.classList.remove('active');
-      updateFirebaseBadge();
-    });
-  });
-
-  function updateFirebaseBadge() {
+  function updateSyncIndicator() {
     const se = window.storageEngine;
+    if (!syncDot) return;
     if (se.firebaseInitialized && se.settings.syncStatus === 'synced') {
-      firebaseStatusBadge.textContent = 'En la Nube (Firestore)';
-      firebaseStatusBadge.style.color = 'var(--accent-training)';
       syncDot.className = 'sync-indicator synced';
-      syncDot.title = 'Sincronizado en tiempo real con Firebase Firestore';
+      syncDot.title = 'Sincronizado en tiempo real';
     } else if (se.settings.syncStatus === 'error') {
-      firebaseStatusBadge.textContent = 'Modo Local (Reglas Firestore)';
-      firebaseStatusBadge.style.color = '#F59E0B';
       syncDot.className = 'sync-indicator error';
-      syncDot.title = 'Guardado local activo. Comprueba que las reglas de Cloud Firestore estén publicadas.';
+      syncDot.title = 'Almacenamiento local activo (comprobar reglas Firestore)';
     } else {
-      firebaseStatusBadge.textContent = 'Almacenamiento Local';
-      firebaseStatusBadge.style.color = 'var(--text-muted)';
       syncDot.className = 'sync-indicator';
-      syncDot.title = 'Almacenamiento local en el dispositivo';
+      syncDot.title = 'Almacenamiento local';
     }
   }
 
@@ -1283,7 +1227,7 @@
       else if (currentActiveView === 'view-matrix') renderMatrix();
       else if (currentActiveView === 'view-stats') renderStats();
     }
-    updateFirebaseBadge();
+    updateSyncIndicator();
     updateAuthUI();
   });
 
@@ -1291,7 +1235,7 @@
   // APP INITIALIZATION
   // ==========================================================================
   updateAuthUI();
-  updateFirebaseBadge();
+  updateSyncIndicator();
   renderCalendar();
 
   console.log('IYANAPP Planta14 cargada con éxito.');
