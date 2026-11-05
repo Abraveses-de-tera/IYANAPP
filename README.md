@@ -47,7 +47,7 @@ Antes del desarrollo de **IYANAPP**, se realizó un análisis de las mejores arq
   - Copia de seguridad: Exportar / Importar archivo JSON completo.
 - **🔐 Seguridad y Control de Edición (PIN):**
   - Modo Consulta para jugadoras y aficionados (solo lectura).
-  - Modo Entrenadora protegido mediante PIN táctil de 4 dígitos (configurable desde Ajustes).
+  - Modo Entrenador protegido mediante PIN táctil de 4 dígitos (configurable desde Ajustes).
 - **☁️ Doble Almacenamiento (LocalStorage + Firebase Firestore):**
   - Funciona 100% de manera autónoma sin necesidad de backend gracias a LocalStorage.
   - Conexión opcional a Firebase Firestore para que todo el cuerpo técnico y jugadoras tengan los datos sincronizados en tiempo real en todos sus dispositivos.
@@ -102,11 +102,11 @@ Para que Firebase permita guardar y leer los datos entre todos los dispositivos 
 
 ---
 
-## 🔒 Seguridad (PIN de Entrenadora)
+## 🔒 Seguridad (PIN de Entrenador)
 
 - El acceso a la edición de asistencias está protegido mediante un PIN numérico privado.
 - Para desbloquear la edición, pulsa en el candado `🔒 Consulta` de la cabecera e introduce el PIN en el teclado numérico.
-- Para cambiar el PIN en cualquier momento, entra en la pestaña **Ajustes** con el modo entrenadora activo y pulsa **"Cambiar PIN de Seguridad"**.
+- Para cambiar el PIN en cualquier momento, entra en la pestaña **Ajustes** con el modo entrenador activo y pulsa **"Cambiar PIN de Seguridad"**.
 
 ---
 

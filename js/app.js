@@ -99,7 +99,7 @@
     if (isUnlocked) {
       btnToggleAuth.className = 'badge-mode unlocked';
       lockIcon.textContent = '🔓';
-      lockText.textContent = 'Entrenadora';
+      lockText.textContent = 'Entrenador';
     } else {
       btnToggleAuth.className = 'badge-mode locked';
       lockIcon.textContent = '🔒';
@@ -147,7 +147,7 @@
           const success = window.storageEngine.unlock(pinBuffer);
           if (success) {
             updateAuthUI();
-            showToast('✅ Modo Entrenadora activado');
+            showToast('✅ Modo Entrenador activado');
             modalPin.classList.remove('active');
             if (pendingAuthAction) {
               pendingAuthAction();
@@ -1195,7 +1195,7 @@
   // PIN Change Prompt
   btnChangePinPrompt.addEventListener('click', () => {
     requireCoachAuth(() => {
-      const newPin = prompt('Introduce el nuevo PIN de 4 dígitos para la Entrenadora:');
+      const newPin = prompt('Introduce el nuevo PIN de 4 dígitos para el Entrenador:');
       if (newPin !== null) {
         if (/^\d{4}$/.test(newPin.trim())) {
           window.storageEngine.changePin(newPin.trim());
