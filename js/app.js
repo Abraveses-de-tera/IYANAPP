@@ -477,6 +477,41 @@
     updateSessionCounters(session);
   }
 
+  // Helper: Generates a futsal jersey SVG with the player's number on chest
+  function createJerseySvg(number, position) {
+    const pos = (position || '').toLowerCase();
+    const isPortera = pos.includes('portera') || pos.includes('portero') || number === 1 || number === 12;
+    
+    // Outfield players: Planta14 Emerald Green & Electric Neon Green
+    // Porteras: Warm Golden Amber
+    const jerseyGradId = `jersey-grad-${isPortera ? 'gk' : 'fp'}-${number || '0'}`;
+    const fillTop = isPortera ? '#f59e0b' : '#00E676';
+    const fillBottom = isPortera ? '#b45309' : '#008744';
+    const borderColor = isPortera ? '#fde68a' : '#bbf7d0';
+    const collarColor = '#FFFFFF';
+    
+    const numStr = (number !== undefined && number !== null && number !== '') ? String(number) : '-';
+    const fontSize = numStr.length > 1 ? '11' : '13';
+
+    return `
+      <svg viewBox="0 0 36 36" width="34" height="34" class="jersey-svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="${jerseyGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="${fillTop}" />
+            <stop offset="100%" stop-color="${fillBottom}" />
+          </linearGradient>
+        </defs>
+        <!-- Jersey silhouette -->
+        <path d="M11 4 L14 7 C16 8.5 20 8.5 22 7 L25 4 L33 9 L29 16 L26 14.5 L26 32 C26 33 25 34 24 34 L12 34 C11 34 10 33 10 32 L10 14.5 L7 16 L3 9 L11 4 Z" 
+              fill="url(#${jerseyGradId})" stroke="${borderColor}" stroke-width="1.4" stroke-linejoin="round" />
+        <!-- V-neck collar -->
+        <path d="M14 7 C16 9.8 20 9.8 22 7" stroke="${collarColor}" stroke-width="1.8" stroke-linecap="round" fill="none" />
+        <!-- Number on the chest -->
+        <text x="18" y="24" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="${fontSize}" fill="#FFFFFF" style="text-shadow: 0 1px 3px rgba(0,0,0,0.9);">${numStr}</text>
+      </svg>
+    `.trim();
+  }
+
   function renderPlayerAttendanceRows(session) {
     sessionPlayerList.innerHTML = '';
     const se = window.storageEngine;
@@ -495,14 +530,15 @@
         row.classList.add('is-absent');
       }
 
-      // Left info: dorsal & name
+      // Left info: futsal jersey badge with dorsal & player name
       const leftDiv = document.createElement('div');
       leftDiv.className = 'player-left';
 
-      const dorsal = document.createElement('div');
-      dorsal.className = 'player-number-badge';
-      dorsal.textContent = player.number || '-';
-      leftDiv.appendChild(dorsal);
+      const jerseyBadge = document.createElement('div');
+      jerseyBadge.className = 'player-jersey-badge';
+      jerseyBadge.innerHTML = createJerseySvg(player.number, player.position);
+      jerseyBadge.title = player.position ? `${player.position} (#${player.number || '-'})` : `Dorsal ${player.number || '-'}`;
+      leftDiv.appendChild(jerseyBadge);
 
       const nameBox = document.createElement('div');
       const nameText = document.createElement('div');
@@ -903,20 +939,24 @@
 
     let html = '<table class="matrix-table">';
     html += '<thead><tr>';
-    html += '<th>Jugadora</th>';
+    html += '<th title="Jugadora">Jug.</th>';
 
     dates.forEach(d => {
       const s = allSessions[d];
       const icon = s.type === 'match' ? '⚽' : '🏃';
       const shortDate = ce.formatDateShort(d).slice(0, 5); // dd/mm
-      html += `<th title="${d} (${s.type})">${icon}<br>${shortDate}</th>`;
+      const typeName = s.type === 'match' ? 'Partido' : 'Entrenamiento';
+      html += `<th title="${d} (${typeName})">${icon}<br>${shortDate}</th>`;
     });
     html += '</tr></thead>';
 
     html += '<tbody>';
     players.forEach(p => {
+      // Shorten name if longer than 5 characters to maximize visible days on mobile screens
+      const shortName = p.name.length > 5 ? p.name.slice(0, 4) + '.' : p.name;
+      const numLabel = p.number ? `<span class="matrix-player-num">${p.number}</span>` : '';
       html += '<tr>';
-      html += `<td>${p.name}${p.number ? ` <span style="color:var(--text-muted)">#${p.number}</span>` : ''}</td>`;
+      html += `<td title="${p.name} ${p.number ? `(#${p.number})` : ''} - ${p.position || 'Jugadora'}">${numLabel}<span class="matrix-player-name">${shortName}</span></td>`;
 
       dates.forEach(d => {
         const s = allSessions[d];
@@ -927,7 +967,7 @@
           const note = s.playerNotes && s.playerNotes[p.id] ? s.playerNotes[p.id] : 'Ausente';
           html += `<td class="matrix-cell-no" title="${note}"><span class="matrix-badge-no">✖</span></td>`;
         } else {
-          html += '<td class="matrix-cell-pending"><span class="matrix-badge-pending">-</span></td>';
+          html += '<td class="matrix-cell-pending" title="Sin registrar"><span class="matrix-badge-pending">-</span></td>';
         }
       });
 
