@@ -35,9 +35,10 @@ class ExportEngine {
     const players = storage.getPlayers(true);
     const allSessions = storage.getAllSessions();
 
-    // Filter dates
+    // Filter dates (excluding cancelled / no-training sessions)
     const dates = Object.keys(allSessions)
       .filter(d => (!startDate || d >= startDate) && (!endDate || d <= endDate))
+      .filter(d => allSessions[d] && allSessions[d].type !== 'none' && !allSessions[d].cancelled)
       .sort();
 
     if (dates.length === 0) {
@@ -186,6 +187,7 @@ class ExportEngine {
 
     const dates = Object.keys(allSessions)
       .filter(d => (!startDate || d >= startDate) && (!endDate || d <= endDate))
+      .filter(d => allSessions[d] && allSessions[d].type !== 'none' && !allSessions[d].cancelled)
       .sort();
 
     if (dates.length === 0) {
@@ -266,9 +268,24 @@ class ExportEngine {
    * Generate formatted WhatsApp text message for instant copy or share
    */
   generateWhatsAppText(dateStr, session, players) {
+    const isCancelled = session && (session.type === 'none' || session.cancelled === true);
+    const dateFormatted = window.calendarEngine.formatDateSpanishLong(dateStr);
+
+    if (isCancelled) {
+      let text = `📢 *PLANTA 14 FÚTBOL SALA FEMENINO*\n`;
+      text += `📅 *${dateFormatted}*\n\n`;
+      text += `🚫 *ENTRENAMIENTO CANCELADO / DÍA LIBRE*\n`;
+      if (session.notes) {
+        text += `📝 *Motivo:* ${session.notes}\n\n`;
+      } else {
+        text += `_Hoy no se realiza sesión de entrenamiento._\n\n`;
+      }
+      text += `_Generado con PLANTA 14 FSF_`;
+      return text;
+    }
+
     const isMatch = session.type === 'match';
     const typeTitle = isMatch ? '⚽ CONVOCATORIA Y ASISTENCIA PARTIDO' : '🏃‍♀️ ASISTENCIA ENTRENAMIENTO';
-    const dateFormatted = window.calendarEngine.formatDateSpanishLong(dateStr);
 
     let text = `*PLANTA 14 FÚTBOL SALA FEMENINO*\n`;
     text += `${typeTitle}\n`;

@@ -297,9 +297,12 @@
         }
 
         const session = se.getSession(cell.dateStr);
-        const sessionType = (session && session.type) ? session.type : cell.scheduledType;
+        const isCancelled = session && (session.type === 'none' || session.cancelled === true);
+        const sessionType = isCancelled ? 'none' : ((session && session.type) ? session.type : cell.scheduledType);
 
-        if (sessionType === 'training') {
+        if (isCancelled) {
+          dayDiv.classList.add('type-cancelled');
+        } else if (sessionType === 'training') {
           dayDiv.classList.add('type-training');
         } else if (sessionType === 'match') {
           dayDiv.classList.add('type-match');
@@ -312,7 +315,12 @@
         dayDiv.appendChild(numSpan);
 
         // Session badge
-        if (sessionType) {
+        if (isCancelled) {
+          const badge = document.createElement('span');
+          badge.className = 'cal-session-badge badge-cancelled';
+          badge.textContent = '🚫 LIBRE';
+          dayDiv.appendChild(badge);
+        } else if (sessionType) {
           const badge = document.createElement('span');
           badge.className = 'cal-session-badge';
           badge.textContent = sessionType === 'match' ? '⚽ PART' : '🏃 ENT';
@@ -369,6 +377,16 @@
     const activeCount = se.getPlayers(false).length;
 
     previewDateLabel.textContent = ce.formatDateSpanishLong(dateStr);
+
+    const isCancelled = session && (session.type === 'none' || session.cancelled === true);
+    if (isCancelled) {
+      previewTypePill.className = 'session-type-pill cancelled';
+      previewTypePill.textContent = '🚫 Sin Entrenamiento';
+      previewRateBadge.textContent = 'Día Libre';
+      previewRateBadge.style.color = 'var(--text-secondary)';
+      previewNotes.textContent = session.notes ? `📝 Motivo: ${session.notes}` : 'No se realiza entrenamiento este día.';
+      return;
+    }
 
     const type = (session && session.type) ? session.type : (scheduledType || 'other');
     if (type === 'match') {
@@ -434,6 +452,13 @@
   const inputSessionNotes = document.getElementById('input-session-notes');
   const btnShareSessionWhatsapp = document.getElementById('btn-share-session-whatsapp');
 
+  const btnToggleCancelTraining = document.getElementById('btn-toggle-cancel-training');
+  const btnCancelTrainingIcon = document.getElementById('btn-cancel-training-icon');
+  const btnCancelTrainingText = document.getElementById('btn-cancel-training-text');
+  const sessionCancelledBanner = document.getElementById('session-cancelled-banner');
+  const btnRestoreTraining = document.getElementById('btn-restore-training');
+  const inputSessionCancelReason = document.getElementById('input-session-cancel-reason');
+
   function renderDayView(dateStr) {
     const ce = window.calendarEngine;
     const se = window.storageEngine;
@@ -449,6 +474,7 @@
       session = {
         date: dateStr,
         type: scheduledType || 'training',
+        cancelled: false,
         records: {},
         playerNotes: {},
         notes: '',
@@ -457,21 +483,63 @@
       };
     }
 
+    const isCancelled = session && (session.type === 'none' || session.cancelled === true);
+    const isMatch = session.type === 'match';
+
     sessionDateTitle.textContent = ce.formatDateSpanishLong(dateStr);
 
-    // Update session type badge
-    const isMatch = session.type === 'match';
-    sessionTypeBadge.className = isMatch ? 'session-type-pill match' : 'session-type-pill training';
-    sessionTypeBadge.textContent = isMatch ? '⚽ Partido' : (session.type === 'training' ? '🏃 Entrenamiento' : '⭐ Extra');
+    // Update toggle button text and styling
+    if (btnToggleCancelTraining) {
+      if (isCancelled) {
+        btnToggleCancelTraining.classList.add('is-cancelled');
+        if (btnCancelTrainingIcon) btnCancelTrainingIcon.textContent = '✅';
+        if (btnCancelTrainingText) btnCancelTrainingText.textContent = 'Restablecer día de entrenamiento';
+      } else {
+        btnToggleCancelTraining.classList.remove('is-cancelled');
+        if (btnCancelTrainingIcon) btnCancelTrainingIcon.textContent = '🚫';
+        if (btnCancelTrainingText) btnCancelTrainingText.textContent = 'Quitar día de entrenamiento (No hay entreno)';
+      }
+    }
 
-    inputSessionType.value = session.type || 'training';
+    // Toggle cancelled banner vs player list & bulk actions
+    if (sessionCancelledBanner) {
+      sessionCancelledBanner.style.display = isCancelled ? 'block' : 'none';
+    }
+    const quickActionsRow = document.querySelector('.quick-attendance-actions');
+    if (quickActionsRow) {
+      quickActionsRow.style.display = isCancelled ? 'none' : 'grid';
+    }
+    if (sessionPlayerList) {
+      sessionPlayerList.style.display = isCancelled ? 'none' : 'flex';
+    }
+
+    if (inputSessionCancelReason) {
+      inputSessionCancelReason.value = session.notes || '';
+    }
+
+    // Update session type badge
+    if (isCancelled) {
+      sessionTypeBadge.className = 'session-type-pill cancelled';
+      sessionTypeBadge.textContent = '🚫 Sin Entrenamiento';
+    } else if (isMatch) {
+      sessionTypeBadge.className = 'session-type-pill match';
+      sessionTypeBadge.textContent = '⚽ Partido';
+    } else if (session.type === 'training') {
+      sessionTypeBadge.className = 'session-type-pill training';
+      sessionTypeBadge.textContent = '🏃 Entrenamiento';
+    } else {
+      sessionTypeBadge.className = 'session-type-pill';
+      sessionTypeBadge.textContent = '⭐ Extra';
+    }
+
+    inputSessionType.value = isCancelled ? 'none' : (session.type || 'training');
     inputSessionOpponent.value = session.opponent || '';
     inputSessionResult.value = session.result || '';
     inputSessionNotes.value = session.notes || '';
 
     // Show/hide opponent and result based on type
-    document.getElementById('group-match-opponent').style.display = isMatch ? 'block' : 'none';
-    document.getElementById('group-match-result').style.display = isMatch ? 'block' : 'none';
+    document.getElementById('group-match-opponent').style.display = (!isCancelled && isMatch) ? 'block' : 'none';
+    document.getElementById('group-match-result').style.display = (!isCancelled && isMatch) ? 'block' : 'none';
 
     renderPlayerAttendanceRows(session);
     updateSessionCounters(session);
@@ -609,6 +677,15 @@
   }
 
   function updateSessionCounters(session) {
+    const isCancelled = session && (session.type === 'none' || session.cancelled === true);
+    if (isCancelled) {
+      sessionCountPresent.textContent = '0';
+      sessionCountAbsent.textContent = '0';
+      sessionPctDisplay.textContent = '🏖️ Día Libre';
+      sessionPctDisplay.style.color = 'var(--text-secondary)';
+      return;
+    }
+
     const se = window.storageEngine;
     const players = se.getPlayers(false);
     let present = 0;
@@ -691,20 +768,88 @@
       const dateStr = ce.selectedDate;
       const existing = se.getSession(dateStr) || { date: dateStr, records: {}, playerNotes: {} };
 
-      existing.type = inputSessionType.value;
+      const selectedType = inputSessionType.value;
+      if (selectedType === 'none') {
+        existing.type = 'none';
+        existing.cancelled = true;
+      } else {
+        existing.type = selectedType;
+        existing.cancelled = false;
+      }
+
       existing.opponent = inputSessionOpponent.value.trim();
       existing.result = inputSessionResult.value.trim();
       existing.notes = inputSessionNotes.value.trim();
 
       se.saveSession(existing);
-      showToast('💾 Detalles guardados');
+      showToast(existing.cancelled ? '🚫 Sesión guardada como día libre' : '💾 Detalles guardados');
 
-      // Update badge
-      const isMatch = existing.type === 'match';
-      sessionTypeBadge.className = isMatch ? 'session-type-pill match' : 'session-type-pill training';
-      sessionTypeBadge.textContent = isMatch ? '⚽ Partido' : (existing.type === 'training' ? '🏃 Entrenamiento' : '⭐ Extra');
-      document.getElementById('group-match-opponent').style.display = isMatch ? 'block' : 'none';
-      document.getElementById('group-match-result').style.display = isMatch ? 'block' : 'none';
+      renderDayView(dateStr);
+      renderCalendar();
+    });
+  }
+
+  function toggleSessionCancellation() {
+    requireCoachAuth(() => {
+      const ce = window.calendarEngine;
+      const se = window.storageEngine;
+      const dateStr = ce.selectedDate;
+      let session = se.getSession(dateStr);
+      const isCurrentlyCancelled = session && (session.type === 'none' || session.cancelled === true);
+
+      if (!isCurrentlyCancelled) {
+        if (!session) {
+          session = {
+            date: dateStr,
+            type: 'none',
+            cancelled: true,
+            records: {},
+            playerNotes: {},
+            notes: '',
+            opponent: '',
+            result: ''
+          };
+        } else {
+          session.type = 'none';
+          session.cancelled = true;
+        }
+        se.saveSession(session);
+        showToast('🚫 Entrenamiento desactivado (Día libre)');
+      } else {
+        const scheduledType = ce.getScheduledType(dateStr) || 'training';
+        session.type = scheduledType;
+        session.cancelled = false;
+        se.saveSession(session);
+        showToast('✅ Entrenamiento restablecido');
+      }
+
+      renderDayView(dateStr);
+      renderCalendar();
+    });
+  }
+
+  if (btnToggleCancelTraining) {
+    btnToggleCancelTraining.addEventListener('click', toggleSessionCancellation);
+  }
+  if (btnRestoreTraining) {
+    btnRestoreTraining.addEventListener('click', toggleSessionCancellation);
+  }
+
+  if (inputSessionCancelReason) {
+    inputSessionCancelReason.addEventListener('change', () => {
+      requireCoachAuth(() => {
+        const ce = window.calendarEngine;
+        const se = window.storageEngine;
+        const dateStr = ce.selectedDate;
+        let session = se.getSession(dateStr);
+        if (!session) {
+          session = { date: dateStr, type: 'none', cancelled: true, records: {}, playerNotes: {} };
+        }
+        session.notes = inputSessionCancelReason.value.trim();
+        inputSessionNotes.value = session.notes;
+        se.saveSession(session);
+        showToast('Motivo guardado');
+      });
     });
   }
 
@@ -914,8 +1059,13 @@
     const selectedMonth = selectMatrixMonth.value;
     const selectedType = selectMatrixType.value;
 
-    // Filter dates
-    let dates = Object.keys(allSessions).sort();
+    // Filter dates (excluding cancelled sessions / días libres)
+    let dates = Object.keys(allSessions)
+      .filter(d => {
+        const s = allSessions[d];
+        return s && s.type !== 'none' && !s.cancelled;
+      })
+      .sort();
 
     if (selectedMonth !== 'all') {
       dates = dates.filter(d => d.startsWith(selectedMonth));

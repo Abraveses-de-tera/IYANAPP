@@ -426,6 +426,24 @@ body {
   background: rgba(245, 158, 11, 0.15);
 }
 
+.cal-day.type-cancelled {
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.2) !important;
+  opacity: 0.6;
+}
+
+.cal-day.type-cancelled .cal-session-badge,
+.cal-session-badge.badge-cancelled {
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.cal-attendance-indicator.status-cancelled {
+  background: var(--text-muted);
+  opacity: 0.3;
+  box-shadow: none;
+}
+
 /* Attendance dots / pill */
 .cal-attendance-indicator {
   width: 6px;
@@ -540,6 +558,59 @@ body {
   background: rgba(245, 158, 11, 0.15);
   color: var(--accent-match);
   border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.session-type-pill.cancelled {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+.session-cancel-action-container {
+  margin-bottom: 12px;
+}
+
+.btn-cancel-training-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed rgba(239, 68, 68, 0.4);
+  color: #F87171;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-training-action:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+  color: #FFFFFF;
+}
+
+.btn-cancel-training-action.is-cancelled {
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.35);
+  color: var(--accent-training);
+}
+
+.btn-cancel-training-action.is-cancelled:hover {
+  background: rgba(0, 230, 118, 0.2);
+  border-color: var(--accent-training);
+}
+
+.session-cancelled-card {
+  background: #0E131E;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 24px 16px;
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .session-date-display {

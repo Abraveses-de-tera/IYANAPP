@@ -156,6 +156,30 @@
         </div>
       </div>
 
+      <!-- Action to remove/cancel or restore training day -->
+      <div class="session-cancel-action-container" style="margin-bottom: 12px;">
+        <button id="btn-toggle-cancel-training" class="btn-cancel-training-action" title="Quitar o restablecer el entrenamiento de este día">
+          <span id="btn-cancel-training-icon">🚫</span>
+          <span id="btn-cancel-training-text">Quitar día de entrenamiento (No hay entreno)</span>
+        </button>
+      </div>
+
+      <!-- Cancelled Session Banner -->
+      <div id="session-cancelled-banner" class="session-cancelled-card" style="display: none;">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">🏖️</div>
+        <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 4px;">Día sin entrenamiento</h4>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px; max-width: 320px; margin-left: auto; margin-right: auto;">
+          Este día no se realiza entrenamiento (día libre / suspendido). No cuenta en las estadísticas ni penaliza a las jugadoras.
+        </p>
+        <div class="form-group" style="margin-bottom: 14px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto;">
+          <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Motivo de cancelación (opcional):</label>
+          <input type="text" id="input-session-cancel-reason" class="form-input" placeholder="Ej. Festivo, descanso, pabellón cerrado...">
+        </div>
+        <button id="btn-restore-training" class="btn-block-action accent-green" style="max-width: 260px; margin: 0 auto;">
+          ✅ Restablecer entrenamiento
+        </button>
+      </div>
+
       <!-- Quick Bulk Actions -->
       <div class="quick-attendance-actions">
         <button id="btn-bulk-present" class="btn-quick-action btn-mark-all-present">
@@ -184,6 +208,7 @@
               <option value="training">🏃 Entrenamiento</option>
               <option value="match">⚽ Partido Oficial</option>
               <option value="other">⭐ Extra / Amistoso</option>
+              <option value="none">🚫 Sin Entrenamiento (Día Libre / Cancelado)</option>
             </select>
           </div>
           <div class="form-group" id="group-match-opponent">

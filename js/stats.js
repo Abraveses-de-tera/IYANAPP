@@ -53,6 +53,7 @@ class StatsEngine {
     // Count session types
     for (const dateStr in sessions) {
       const s = sessions[dateStr];
+      if (s.type === 'none' || s.cancelled === true) continue;
       totalSessions++;
       if (s.type === 'training') totalTrainings++;
       else if (s.type === 'match') totalMatches++;
@@ -72,6 +73,7 @@ class StatsEngine {
 
       for (const dateStr in sessions) {
         const s = sessions[dateStr];
+        if (s.type === 'none' || s.cancelled === true) continue;
         const record = s.records ? s.records[player.id] : undefined;
 
         // If player has a record in this session

@@ -210,6 +210,10 @@ class CalendarEngine {
    * - 'unrecorded': not yet registered (Gris)
    */
   getDateAttendanceStatus(dateStr, sessionData, activePlayersCount) {
+    if (sessionData && (sessionData.type === 'none' || sessionData.cancelled === true)) {
+      return { status: 'cancelled', rate: 0, count: 0, total: 0 };
+    }
+
     if (!sessionData || !sessionData.records || Object.keys(sessionData.records).length === 0) {
       return { status: 'unrecorded', rate: 0, count: 0, total: activePlayersCount };
     }
