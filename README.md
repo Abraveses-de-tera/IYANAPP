@@ -73,26 +73,19 @@ Antes del desarrollo de **IYANAPP**, se realizó un análisis de las mejores arq
 
 ## ☁️ Guía paso a paso: Configurar Firebase Firestore (Sincronización en la Nube)
 
-Si deseas que la app sincronice los datos automáticamente entre varios teléfonos a la vez, sigue estos sencillos pasos:
+## ☁️ Sincronización en la Nube (Firebase Firestore)
 
-1. Ve a **[Firebase Console](https://console.firebase.google.com/)** e inicia sesión con una cuenta de Google gratuita.
-2. Pulsa en **"Agregar proyecto"**, nómbralo (ej. `planta14-asistencia`) y finaliza el asistente.
-3. En la pantalla principal del proyecto, pulsa en el icono de **Web** (`</>`) para registrar una app web.
-4. Introduce el apodo (ej. `IYANAPP`) y pulsa **Registrar app**.
-5. Se mostrará un bloque de código `firebaseConfig`. Copia ese fragmento, que tiene este formato:
-   ```json
-   {
-     "apiKey": "AIzaSy...",
-     "authDomain": "planta14-asistencia.firebaseapp.com",
-     "projectId": "planta14-asistencia",
-     "storageBucket": "planta14-asistencia.appspot.com",
-     "messagingSenderId": "1234567890",
-     "appId": "1:1234567890:web:abcdef"
-   }
-   ```
-6. En el menú lateral izquierdo de Firebase, ve a **Compilación > Cloud Firestore** y pulsa **"Crear base de datos"**.
-7. Selecciona una ubicación (ej. `europe-west3` o `eur3`) y pulsa Siguiente.
-8. En las **Reglas de seguridad**, puedes iniciar en "Modo de prueba" o poner las siguientes reglas para permitir lectura y escritura desde la app:
+La aplicación ya viene **preconfigurada de fábrica** en el código con el proyecto oficial de Planta14:
+- **Proyecto:** `planta14-asistencia`
+- **Dominio:** `planta14-asistencia.firebaseapp.com`
+- **Almacenamiento:** `planta14-asistencia.firebasestorage.app`
+
+### ⚠️ Paso imprescindible en Firebase Console (Activar Reglas de Firestore)
+Para que Firebase permita guardar y leer los datos entre todos los dispositivos del equipo sin bloquear los permisos:
+
+1. Entra en tu consola de Firebase: **[https://console.firebase.google.com/project/planta14-asistencia/firestore/rules](https://console.firebase.google.com/project/planta14-asistencia/firestore/rules)**
+2. Si aún no has creado la base de datos Firestore, pulsa **"Crear base de datos"** (selecciona ubicación `eur3` o `europe-west3`).
+3. Ve a la pestaña **Reglas** y pon las siguientes reglas de lectura/escritura:
    ```javascript
    rules_version = '2';
    service cloud.firestore {
@@ -103,8 +96,9 @@ Si deseas que la app sincronice los datos automáticamente entre varios teléfon
      }
    }
    ```
-9. Abre **IYANAPP** en tu móvil, entra en la pestaña **Ajustes (⚙️)**, pulsa en **"Configurar Firebase Firestore"**, pega el objeto JSON copiado y pulsa **Conectar**.
-10. ¡A partir de ese momento, cualquier asistencia guardada se sincronizará automáticamente en tiempo real con todos los dispositivos del equipo!
+4. Pulsa **Publicar**.
+
+¡A partir de ese momento, cada vez que cualquier persona del equipo abra la app, se sincronizará automáticamente en tiempo real! Y si en algún momento no hay cobertura en el pabellón, la app sigue funcionando al 100% en modo local y sincroniza al recuperar internet.
 
 ---
 

@@ -1257,14 +1257,21 @@
 
   function updateFirebaseBadge() {
     const se = window.storageEngine;
-    if (se.firebaseInitialized) {
+    if (se.firebaseInitialized && se.settings.syncStatus === 'synced') {
       firebaseStatusBadge.textContent = 'En la Nube (Firestore)';
       firebaseStatusBadge.style.color = 'var(--accent-training)';
       syncDot.className = 'sync-indicator synced';
+      syncDot.title = 'Sincronizado en tiempo real con Firebase Firestore';
+    } else if (se.settings.syncStatus === 'error') {
+      firebaseStatusBadge.textContent = 'Modo Local (Reglas Firestore)';
+      firebaseStatusBadge.style.color = '#F59E0B';
+      syncDot.className = 'sync-indicator error';
+      syncDot.title = 'Guardado local activo. Comprueba que las reglas de Cloud Firestore estén publicadas.';
     } else {
       firebaseStatusBadge.textContent = 'Almacenamiento Local';
       firebaseStatusBadge.style.color = 'var(--text-muted)';
       syncDot.className = 'sync-indicator';
+      syncDot.title = 'Almacenamiento local en el dispositivo';
     }
   }
 

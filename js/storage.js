@@ -26,13 +26,23 @@ const DEFAULT_PLAYERS = [
   { id: 'p_13', name: 'Yaralla', number: 13, position: 'Ala / Pívot', active: true }
 ];
 
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC6Bw8AnNCNk7nV8OnWQZeLwfO6spoEpJo",
+  authDomain: "planta14-asistencia.firebaseapp.com",
+  projectId: "planta14-asistencia",
+  storageBucket: "planta14-asistencia.firebasestorage.app",
+  messagingSenderId: "811503000972",
+  appId: "1:811503000972:web:fda96386f4b4018a9fcaa9",
+  measurementId: "G-BB0SZDSETL"
+};
+
 const DEFAULT_SETTINGS = {
   teamName: 'Planta14',
   teamSubtitle: 'Fútbol Sala Femenino',
   seasonStart: '2026-10-01',
   seasonEnd: '2027-07-31',
   pin: '1414',
-  firebaseConfig: null,
+  firebaseConfig: DEFAULT_FIREBASE_CONFIG,
   syncStatus: 'local' // 'local', 'syncing', 'synced', 'error'
 };
 
@@ -55,6 +65,9 @@ class StorageEngine {
     if (storedSettings) {
       try {
         this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) };
+        if (!this.settings.firebaseConfig || !this.settings.firebaseConfig.apiKey) {
+          this.settings.firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+        }
       } catch (e) {
         console.error('Error parsing settings:', e);
       }
@@ -91,7 +104,15 @@ class StorageEngine {
 
     // 5. Try init Firebase if config exists
     if (this.settings.firebaseConfig) {
-      this.initFirebase(this.settings.firebaseConfig);
+      if (typeof firebase !== 'undefined') {
+        this.initFirebase(this.settings.firebaseConfig);
+      } else {
+        window.addEventListener('load', () => {
+          if (typeof firebase !== 'undefined' && !this.firebaseInitialized) {
+            this.initFirebase(this.settings.firebaseConfig);
+          }
+        });
+      }
     }
   }
 
@@ -372,6 +393,13 @@ class StorageEngine {
       }
 
       this.firestoreDb = firebase.firestore(app);
+      try {
+        this.firestoreDb.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+          console.warn('Firestore persistence warning:', err.code);
+        });
+      } catch (e) {
+        // Ignored if persistence not available
+      }
       this.firebaseInitialized = true;
       this.settings.syncStatus = 'synced';
       this.saveSettings(this.settings);
