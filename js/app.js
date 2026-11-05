@@ -423,6 +423,9 @@
   function renderDayView(dateStr) {
     const ce = window.calendarEngine;
     const se = window.storageEngine;
+    if (!dateStr) {
+      dateStr = ce.selectedDate || ce.formatDate(new Date());
+    }
     ce.selectedDate = dateStr;
 
     const scheduledType = ce.getScheduledType(dateStr);
@@ -536,8 +539,12 @@
 
       toggleBtn.addEventListener('click', () => {
         requireCoachAuth(() => {
-          // Toggle between true -> false -> true
-          const nextStatus = status === true ? false : true;
+          const freshSession = se.getSession(session.date) || session;
+          const curStatus = (freshSession.records && freshSession.records[player.id] !== undefined)
+            ? freshSession.records[player.id]
+            : undefined;
+          const nextStatus = curStatus === true ? false : true;
+
           se.setAttendanceRecord(session.date, session.type, player.id, nextStatus);
           renderDayView(session.date);
           showToast(`Guardado: ${player.name} -> ${nextStatus ? 'Asiste' : 'No asiste'}`);
@@ -579,7 +586,8 @@
     requireCoachAuth(() => {
       const ce = window.calendarEngine;
       const se = window.storageEngine;
-      const session = se.getSession(ce.selectedDate) || { date: ce.selectedDate, type: ce.getScheduledType(ce.selectedDate) || 'training' };
+      const dateStr = ce.selectedDate || ce.formatDate(new Date());
+      const session = se.getSession(dateStr) || { date: dateStr, type: ce.getScheduledType(dateStr) || 'training' };
       se.setBulkAttendance(session.date, session.type, true);
       renderDayView(session.date);
       showToast('✅ Todas marcadas como presentes');
@@ -590,7 +598,8 @@
     requireCoachAuth(() => {
       const ce = window.calendarEngine;
       const se = window.storageEngine;
-      const session = se.getSession(ce.selectedDate) || { date: ce.selectedDate, type: ce.getScheduledType(ce.selectedDate) || 'training' };
+      const dateStr = ce.selectedDate || ce.formatDate(new Date());
+      const session = se.getSession(dateStr) || { date: dateStr, type: ce.getScheduledType(dateStr) || 'training' };
       se.setBulkAttendance(session.date, session.type, false);
       renderDayView(session.date);
       showToast('❌ Todas marcadas como ausentes');
@@ -1221,7 +1230,7 @@
 
   // Real-time synchronization event listener from storageEngine
   window.storageEngine.subscribe((eventType, data) => {
-    if (eventType === 'firebase_sync' || eventType === 'session') {
+    if (eventType === 'firebase_sync') {
       if (currentActiveView === 'view-calendar') renderCalendar();
       else if (currentActiveView === 'view-day') renderDayView(window.calendarEngine.selectedDate);
       else if (currentActiveView === 'view-matrix') renderMatrix();

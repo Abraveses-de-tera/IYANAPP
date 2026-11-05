@@ -225,6 +225,8 @@ class StorageEngine {
       ...existing,
       ...sessionData,
       date: dateStr,
+      records: { ...(existing.records || {}), ...(sessionData.records || {}) },
+      playerNotes: { ...(existing.playerNotes || {}), ...(sessionData.playerNotes || {}) },
       updatedAt: Date.now()
     };
 
@@ -419,24 +421,65 @@ class StorageEngine {
 
     const teamDocRef = this.firestoreDb.collection('iyanapp_teams').doc('planta14');
 
-    teamDocRef.onSnapshot((doc) => {
+    teamDocRef.onSnapshot({ includeMetadataChanges: true }, (doc) => {
+      // Ignore local pending writes so we don't trigger re-renders or rollbacks on self
+      if (doc.metadata && doc.metadata.hasPendingWrites) {
+        return;
+      }
+
       if (doc.exists) {
-        const remoteData = doc.data();
-        if (remoteData.players && Array.isArray(remoteData.players)) {
+        const remoteData = doc.data() || {};
+        let changed = false;
+
+        if (remoteData.players && Array.isArray(remoteData.players) && remoteData.players.length > 0) {
           this.players = remoteData.players;
           localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(this.players));
+          changed = true;
         }
+
+        // Gather sessions from remote
+        const incomingSessions = {};
         if (remoteData.sessions && typeof remoteData.sessions === 'object') {
-          this.sessions = remoteData.sessions;
-          localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(this.sessions));
+          Object.assign(incomingSessions, remoteData.sessions);
         }
-        this.notify('firebase_sync', true);
+        for (const k in remoteData) {
+          if (k.startsWith('sessions.') && remoteData[k]) {
+            const dStr = k.replace('sessions.', '');
+            incomingSessions[dStr] = remoteData[k];
+          }
+        }
+
+        // Only merge if remote has sessions
+        if (Object.keys(incomingSessions).length > 0) {
+          const merged = { ...this.sessions };
+          let sessionsUpdated = false;
+
+          for (const dStr in incomingSessions) {
+            const remoteS = incomingSessions[dStr];
+            const localS = merged[dStr];
+            // If remote is strictly newer or local doesn't have it, update
+            if (!localS || (remoteS.updatedAt || 0) > (localS.updatedAt || 0)) {
+              merged[dStr] = remoteS;
+              sessionsUpdated = true;
+            }
+          }
+
+          if (sessionsUpdated) {
+            this.sessions = merged;
+            localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(this.sessions));
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          this.notify('firebase_sync', true);
+        }
       } else {
         // Document does not exist yet; populate initial data to Firestore
         this.syncAllToFirebase();
       }
     }, (error) => {
-      console.error('Firebase snapshot listener error:', error);
+      console.warn('Firebase snapshot listener notice:', error);
       this.settings.syncStatus = 'error';
     });
   }
@@ -447,16 +490,17 @@ class StorageEngine {
     try {
       const teamDocRef = this.firestoreDb.collection('iyanapp_teams').doc('planta14');
       if (type === 'players') {
-        await teamDocRef.set({ players: data, lastUpdated: Date.now() }, { merge: true });
+        await teamDocRef.set({ players: this.players, lastUpdated: Date.now() }, { merge: true });
       } else if (type === 'session') {
-        const updatePayload = {};
-        updatePayload[`sessions.${data.date}`] = data;
-        updatePayload.lastUpdated = Date.now();
-        await teamDocRef.set(updatePayload, { merge: true });
+        // Store the full sessions map directly in Firestore
+        await teamDocRef.set({
+          sessions: this.sessions,
+          lastUpdated: Date.now()
+        }, { merge: true });
       }
       this.settings.syncStatus = 'synced';
     } catch (err) {
-      console.error('Firebase write error:', err);
+      console.warn('Firebase sync notice (saved locally in LocalStorage):', err);
       this.settings.syncStatus = 'error';
     }
   }
