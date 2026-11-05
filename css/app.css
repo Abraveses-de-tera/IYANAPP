@@ -1249,3 +1249,137 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ==========================================================================
+   ANIMATED FUTSAL BALL WIDGET (BOTANDO / GIRANDO)
+   ========================================================================== */
+.futsal-ball-container {
+  position: fixed;
+  z-index: 85;
+  width: 40px;
+  height: 40px;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 0.3s ease;
+}
+
+.futsal-ball-container.disabled {
+  display: none !important;
+}
+
+/* Modo 1: Pelota botando por la pantalla (No molesta: pointer-events: none) */
+.futsal-ball-container.bouncing {
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.75));
+}
+
+.futsal-ball-container.bouncing .futsal-ball-wrapper {
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+/* Modo 2: Icono en esquina dando vueltas */
+.futsal-ball-container.spinning {
+  pointer-events: auto;
+  cursor: pointer;
+  right: 14px;
+  bottom: 74px;
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 4px 14px rgba(0, 230, 118, 0.5));
+  animation: floatBob 2.6s ease-in-out infinite alternate;
+  border-radius: 50%;
+}
+
+.futsal-ball-container.spinning .futsal-ball-wrapper {
+  width: 100%;
+  height: 100%;
+  animation: spinBallContinuous 5s linear infinite;
+  transform-origin: center center;
+}
+
+.futsal-ball-container.spinning:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 6px 18px rgba(0, 230, 118, 0.8));
+}
+
+.futsal-ball-container.spinning:active {
+  transform: scale(0.92);
+}
+
+@keyframes floatBob {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+  100% { transform: translateY(2px); }
+}
+
+@keyframes spinBallContinuous {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Quick Floating Switch Button in Header */
+.btn-ball-header-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-ball-header-toggle:hover {
+  border-color: var(--accent-training);
+  color: var(--accent-training);
+}
+
+/* Settings Ball Selector */
+.ball-mode-selector {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 400px) {
+  .ball-mode-selector {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.btn-ball-mode {
+  padding: 10px 12px;
+  background: #141924;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.btn-ball-mode:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+}
+
+.btn-ball-mode.active {
+  background: rgba(0, 230, 118, 0.16);
+  border-color: var(--accent-training);
+  color: var(--accent-training);
+  box-shadow: 0 0 10px var(--accent-training-glow);
+}

@@ -1357,11 +1357,169 @@
   });
 
   // ==========================================================================
+  // ANIMATED FUTSAL BALL SYSTEM (BOTANDO / GIRANDO)
+  // ==========================================================================
+  const futsalBall = document.getElementById('futsal-floating-ball');
+  const ballWrapper = futsalBall ? futsalBall.querySelector('.futsal-ball-wrapper') : null;
+  const ballModeButtons = document.querySelectorAll('.btn-ball-mode');
+  const btnBallHeaderToggle = document.getElementById('btn-ball-header-toggle');
+
+  let currentBallMode = localStorage.getItem('planta14_ball_mode') || 'bouncing';
+  let ballAnimFrameId = null;
+
+  // Physics state for bouncing mode
+  const ballSize = 38;
+  let posX = Math.max(20, Math.random() * (Math.max(200, window.innerWidth - 60)));
+  let posY = 120 + Math.random() * 150;
+  let velX = 1.6 * (Math.random() > 0.5 ? 1 : -1);
+  let velY = 1.9 * (Math.random() > 0.5 ? 1 : -1);
+  let rotationDeg = 0;
+
+  function initBallSystem() {
+    setBallMode(currentBallMode);
+
+    ballModeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-ball-mode');
+        setBallMode(mode);
+        if (mode === 'bouncing') showToast('⚽ Pelota botando activada');
+        else if (mode === 'spinning') showToast('🔄 Modo icono girando activado');
+        else showToast('Balón desactivado');
+      });
+    });
+
+    if (btnBallHeaderToggle) {
+      btnBallHeaderToggle.addEventListener('click', () => {
+        cycleNextBallMode();
+      });
+    }
+
+    if (futsalBall) {
+      futsalBall.addEventListener('click', () => {
+        if (currentBallMode === 'spinning') {
+          cycleNextBallMode();
+        }
+      });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (ballAnimFrameId) cancelAnimationFrame(ballAnimFrameId);
+      } else {
+        if (currentBallMode === 'bouncing') {
+          startBouncingPhysics();
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const maxX = window.innerWidth - ballSize - 6;
+      const maxY = window.innerHeight - 70 - ballSize;
+      if (posX > maxX) posX = Math.max(6, maxX);
+      if (posY > maxY) posY = Math.max(62, maxY);
+    });
+  }
+
+  function cycleNextBallMode() {
+    if (currentBallMode === 'bouncing') {
+      setBallMode('spinning');
+      showToast('🔄 Modo icono en esquina dando vueltas');
+    } else if (currentBallMode === 'spinning') {
+      setBallMode('disabled');
+      showToast('⏹️ Pelota desactivada');
+    } else {
+      setBallMode('bouncing');
+      showToast('⚽ Pelota botando por la pantalla');
+    }
+  }
+
+  function setBallMode(mode) {
+    currentBallMode = mode;
+    localStorage.setItem('planta14_ball_mode', mode);
+
+    ballModeButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-ball-mode') === mode);
+    });
+
+    if (btnBallHeaderToggle) {
+      if (mode === 'bouncing') btnBallHeaderToggle.textContent = '⚽';
+      else if (mode === 'spinning') btnBallHeaderToggle.textContent = '🔄';
+      else btnBallHeaderToggle.textContent = '⏹️';
+    }
+
+    if (!futsalBall) return;
+
+    if (ballAnimFrameId) {
+      cancelAnimationFrame(ballAnimFrameId);
+      ballAnimFrameId = null;
+    }
+
+    futsalBall.classList.remove('bouncing', 'spinning', 'disabled');
+
+    if (mode === 'disabled') {
+      futsalBall.classList.add('disabled');
+      futsalBall.style.transform = '';
+      if (ballWrapper) ballWrapper.style.transform = '';
+    } else if (mode === 'spinning') {
+      futsalBall.classList.add('spinning');
+      futsalBall.style.transform = '';
+      if (ballWrapper) ballWrapper.style.transform = '';
+    } else { // 'bouncing'
+      futsalBall.classList.add('bouncing');
+      startBouncingPhysics();
+    }
+  }
+
+  function startBouncingPhysics() {
+    if (ballAnimFrameId) cancelAnimationFrame(ballAnimFrameId);
+
+    function step() {
+      if (currentBallMode !== 'bouncing') return;
+
+      const minX = 6;
+      const maxX = Math.max(minX + 10, window.innerWidth - ballSize - 6);
+      const minY = 62; // Below top header
+      const maxY = Math.max(minY + 20, window.innerHeight - 70 - ballSize); // Above bottom nav
+
+      posX += velX;
+      posY += velY;
+
+      rotationDeg = (rotationDeg + velX * 2.8) % 360;
+
+      if (posX <= minX) {
+        posX = minX;
+        velX = Math.abs(velX);
+      } else if (posX >= maxX) {
+        posX = maxX;
+        velX = -Math.abs(velX);
+      }
+
+      if (posY <= minY) {
+        posY = minY;
+        velY = Math.abs(velY);
+      } else if (posY >= maxY) {
+        posY = maxY;
+        velY = -Math.abs(velY);
+      }
+
+      futsalBall.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+      if (ballWrapper) {
+        ballWrapper.style.transform = `rotate(${rotationDeg}deg)`;
+      }
+
+      ballAnimFrameId = requestAnimationFrame(step);
+    }
+
+    ballAnimFrameId = requestAnimationFrame(step);
+  }
+
+  // ==========================================================================
   // APP INITIALIZATION
   // ==========================================================================
   updateAuthUI();
   updateSyncIndicator();
   renderCalendar();
+  initBallSystem();
 
   console.log('PLANTA 14 FSF cargada con éxito.');
 })();
