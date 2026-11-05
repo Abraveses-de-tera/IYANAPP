@@ -1,4 +1,4 @@
-# IYANAPP ⚽👟 &bull; Planta14 Futsal Femenino
+# PLANTA 14 FSF ⚽👟 &bull; Fútbol Sala Femenino
 
 PWA (Progressive Web App) móvil para el control exhaustivo de asistencia a entrenamientos y partidos del equipo de fútbol sala femenino **Planta14**.
 
@@ -9,7 +9,7 @@ PWA (Progressive Web App) móvil para el control exhaustivo de asistencia a entr
 
 ## 🔎 Investigación previa y repositorios de referencia
 
-Antes del desarrollo de **IYANAPP**, se realizó un análisis de las mejores arquitecturas y utilidades de control de asistencia deportiva y laboral en GitHub:
+Antes del desarrollo de **PLANTA 14 FSF**, se realizó un análisis de las mejores arquitecturas y utilidades de control de asistencia deportiva y laboral en GitHub:
 
 1. **[mbeacom/openleague](https://github.com/mbeacom/openleague)**: Referencia para la gestión de calendarios deportivos y respuesta rápida de asistencia a eventos.
 2. **[CiucurDaniel/Sport-Attendace-Manager](https://github.com/CiucurDaniel/Sport-Attendace-Manager)**: Modelo de flujo de trabajo enfocado al entrenador, control de convocatorias y hojas de partido.
@@ -60,13 +60,13 @@ Antes del desarrollo de **IYANAPP**, se realizó un análisis de las mejores arq
 1. Abre el enlace en Chrome: **[https://abraveses-de-tera.github.io/IYANAPP/](https://abraveses-de-tera.github.io/IYANAPP/)**
 2. Aparecerá un aviso en la parte inferior o pulsa en los **tres puntos verticales (⋮)** arriba a la derecha.
 3. Selecciona **"Instalar aplicación"** o **"Añadir a la pantalla de inicio"**.
-4. ¡Listo! IYANAPP aparecerá como una app nativa con el escudo de Planta14, a pantalla completa y sin barra de direcciones.
+4. ¡Listo! **PLANTA 14 FSF** aparecerá como una app nativa con el escudo de Planta14, a pantalla completa y sin barra de direcciones.
 
 ### En iPhone / iOS (Safari)
 1. Abre el enlace en **Safari**: **[https://abraveses-de-tera.github.io/IYANAPP/](https://abraveses-de-tera.github.io/IYANAPP/)**
 2. Pulsa en el botón **Compartir** (el icono de un cuadrado con una flecha hacia arriba en la barra inferior).
 3. Desliza hacia abajo y pulsa en **"Añadir a la pantalla de inicio"** (icono con un símbolo `+`).
-4. Confirma el nombre "IYANAPP" y pulsa **Añadir**.
+4. Confirma el nombre "PLANTA 14 FSF" y pulsa **Añadir**.
 5. Ya tendrás el icono oficial de Planta14 en tu pantalla de inicio funcionando a pantalla completa.
 
 ---

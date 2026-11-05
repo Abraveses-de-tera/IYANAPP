@@ -1,6 +1,6 @@
 {
-  "name": "IYANAPP - Planta14 Futsal",
-  "short_name": "IYANAPP",
+  "name": "PLANTA 14 FSF",
+  "short_name": "PLANTA 14 FSF",
   "description": "Control de asistencia a entrenamientos y partidos del equipo de fútbol sala femenino Planta14",
   "start_url": "./index.html",
   "scope": "./",

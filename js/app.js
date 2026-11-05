@@ -1285,7 +1285,7 @@
   btnExportJson.addEventListener('click', () => {
     const jsonStr = window.storageEngine.exportBackup();
     const blob = new Blob([jsonStr], { type: 'application/json' });
-    const filename = `IYANAPP_Backup_Planta14_${new Date().toISOString().slice(0, 10)}.json`;
+    const filename = `PLANTA_14_FSF_Backup_${new Date().toISOString().slice(0, 10)}.json`;
     window.exportEngine.downloadBlob(blob, filename);
     showToast('Copia de seguridad descargada');
   });
@@ -1363,5 +1363,5 @@
   updateSyncIndicator();
   renderCalendar();
 
-  console.log('IYANAPP Planta14 cargada con éxito.');
+  console.log('PLANTA 14 FSF cargada con éxito.');
 })();

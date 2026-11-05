@@ -370,7 +370,7 @@ class StorageEngine {
   // --- Backup: JSON Export / Import ---
   exportBackup() {
     const data = {
-      app: 'IYANAPP',
+      app: 'PLANTA 14 FSF',
       team: 'Planta14',
       exportDate: new Date().toISOString(),
       version: 1,

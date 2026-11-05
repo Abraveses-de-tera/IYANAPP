@@ -47,7 +47,7 @@ class ExportEngine {
 
     // 1. Sheet: Resumen de Jugadoras
     const summaryData = [
-      ['IYANAPP - PLANTA 14 FÚTBOL SALA FEMENINO'],
+      ['PLANTA 14 FSF - FÚTBOL SALA FEMENINO'],
       ['INFORME DE ASISTENCIA'],
       ['Rango de fechas:', `${startDate || 'Inicio'} hasta ${endDate || 'Fin'}`],
       ['Fecha de generación:', new Date().toLocaleDateString('es-ES')],
@@ -101,7 +101,7 @@ class ExportEngine {
     }
 
     const matrixData = [
-      ['IYANAPP - PLANTA 14 : MATRIZ DE ASISTENCIA'],
+      ['PLANTA 14 FSF : MATRIZ DE ASISTENCIA'],
       matrixHeader
     ];
 
@@ -124,7 +124,7 @@ class ExportEngine {
 
     // 3. Sheet: Detalle de Sesiones
     const sessionDetailsData = [
-      ['IYANAPP - DETALLE DE SESIONES'],
+      ['PLANTA 14 FSF - DETALLE DE SESIONES'],
       ['Fecha', 'Tipo', 'Rival / Notas', 'Resultado', 'Presentes', 'Ausentes', '% Asistencia', 'Lista de Ausentes']
     ];
 
@@ -319,7 +319,7 @@ class ExportEngine {
     }
 
     text += `📊 *Asistencia:* ${presentList.length}/${totalActive} (${pct}%)\n`;
-    text += `_Generado con IYANAPP Planta14_`;
+    text += `_Generado con PLANTA 14 FSF_`;
 
     return text;
   }
@@ -333,7 +333,7 @@ class ExportEngine {
 
     if (navigator.share) {
       navigator.share({
-        title: 'IYANAPP - Planta14 Futsal',
+        title: 'PLANTA 14 FSF',
         text: text
       }).catch(() => {
         window.open(waUrl, '_blank');
