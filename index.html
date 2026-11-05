@@ -540,6 +540,16 @@
 
       <input type="hidden" id="edit-player-id">
 
+      <!-- Live Jersey Preview in Modal -->
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0 14px 0; border-bottom: 1px solid var(--border-subtle); margin-bottom: 14px; background: rgba(255, 255, 255, 0.02); border-radius: 10px;">
+        <div id="modal-jersey-preview" class="player-jersey-badge" style="width: 52px; height: 52px;">
+          <!-- Live SVG jersey preview will be updated via JS -->
+        </div>
+        <div id="modal-jersey-pos-badge" style="margin-top: 8px; font-size: 0.78rem; font-weight: 700; color: var(--accent-training); text-transform: uppercase; letter-spacing: 0.5px;">
+          Camiseta Jugadora (Verde)
+        </div>
+      </div>
+
       <div class="form-group" style="margin-bottom: 12px;">
         <label>Nombre:</label>
         <input type="text" id="input-player-name" class="form-input" placeholder="Nombre de la jugadora">
@@ -554,11 +564,13 @@
       <div class="form-group" style="margin-bottom: 14px;">
         <label>Posición:</label>
         <select id="input-player-position" class="form-select">
-          <option value="Portera">Portera</option>
-          <option value="Cierre">Cierre</option>
-          <option value="Ala">Ala</option>
-          <option value="Pívot">Pívot</option>
-          <option value="Universal">Universal</option>
+          <option value="Portera">Portera (Camiseta Amarilla)</option>
+          <option value="Cierre">Cierre (Camiseta Verde)</option>
+          <option value="Ala">Ala (Camiseta Verde)</option>
+          <option value="Pívot">Pívot (Camiseta Verde)</option>
+          <option value="Ala / Cierre">Ala / Cierre (Camiseta Verde)</option>
+          <option value="Ala / Pívot">Ala / Pívot (Camiseta Verde)</option>
+          <option value="Universal">Universal (Camiseta Verde)</option>
         </select>
       </div>
 

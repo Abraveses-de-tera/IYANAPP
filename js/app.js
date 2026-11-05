@@ -547,12 +547,15 @@
 
   // Helper: Generates a futsal jersey SVG with the player's number on chest
   function createJerseySvg(number, position) {
-    const pos = (position || '').toLowerCase();
-    const isPortera = pos.includes('portera') || pos.includes('portero') || number === 1 || number === 12;
+    const pos = (position || '').trim().toLowerCase();
+    // Portera is yellow/amber. Any other position is green automatically.
+    // If position is empty/unspecified, fallback to checking dorsal 1 or 12.
+    const isPortera = pos.length > 0 ? (pos.includes('porter') || pos.includes('arq')) : (number === 1 || number === 12);
     
-    // Outfield players: Planta14 Emerald Green & Electric Neon Green
-    // Porteras: Warm Golden Amber
-    const jerseyGradId = `jersey-grad-${isPortera ? 'gk' : 'fp'}-${number || '0'}`;
+    // Outfield players: Planta14 Emerald Green & Electric Neon Green (#00E676 -> #008744)
+    // Porteras: Warm Golden Amber (#F59E0B -> #B45309)
+    const randSuffix = Math.random().toString(36).substring(2, 7);
+    const jerseyGradId = `jersey-grad-${isPortera ? 'gk' : 'fp'}-${number || '0'}-${randSuffix}`;
     const fillTop = isPortera ? '#f59e0b' : '#00E676';
     const fillBottom = isPortera ? '#b45309' : '#008744';
     const borderColor = isPortera ? '#fde68a' : '#bbf7d0';
@@ -562,7 +565,7 @@
     const fontSize = numStr.length > 1 ? '11' : '13';
 
     return `
-      <svg viewBox="0 0 36 36" width="34" height="34" class="jersey-svg" aria-hidden="true">
+      <svg viewBox="0 0 36 36" width="100%" height="100%" class="jersey-svg" aria-hidden="true">
         <defs>
           <linearGradient id="${jerseyGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="${fillTop}" />
@@ -1257,21 +1260,24 @@
       item.className = 'roster-manage-item';
       if (!p.active) item.classList.add('inactive');
 
-      const dorsalLabel = (p.number !== null && p.number !== undefined) ? `#${p.number}` : '-';
+      const isPortera = (p.position || '').trim().toLowerCase().includes('porter');
+      const posColor = isPortera ? 'var(--accent-match, #F59E0B)' : 'var(--text-secondary)';
 
       item.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 24px; padding: 0 6px; border-radius: 6px; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.35); color: var(--accent-training); font-size: 0.8rem; font-weight: 800;">
-            ${dorsalLabel}
-          </span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="player-jersey-badge" style="width: 36px; height: 36px; flex-shrink: 0;" title="${p.position || 'Jugadora'} (#${p.number !== null && p.number !== undefined ? p.number : '-'})">
+            ${createJerseySvg(p.number, p.position)}
+          </div>
           <div>
-            <strong style="color: ${p.active ? 'var(--text-main)' : 'var(--text-muted)'}; font-size: 0.9rem;">
-              ${p.name}
-            </strong>
-            <span style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 6px;">
-              &bull; ${p.position || 'Jugadora'}
-            </span>
-            ${!p.active ? '<span style="font-size: 0.65rem; color: var(--accent-danger); margin-left: 4px;">(Baja)</span>' : ''}
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <strong style="color: ${p.active ? 'var(--text-main)' : 'var(--text-muted)'}; font-size: 0.95rem;">
+                ${p.name}
+              </strong>
+              ${!p.active ? '<span style="font-size: 0.65rem; color: var(--accent-danger); font-weight: 700;">(Baja)</span>' : ''}
+            </div>
+            <div style="font-size: 0.76rem; color: ${posColor}; font-weight: 600; margin-top: 2px;">
+              ${p.position || 'Jugadora'}
+            </div>
           </div>
         </div>
         <div class="roster-manage-actions">
@@ -1318,23 +1324,49 @@
   const inputPlayerPosition = document.getElementById('input-player-position');
   const btnSavePlayerData = document.getElementById('btn-save-player-data');
   const playerNumberWarning = document.getElementById('player-number-warning');
+  const modalJerseyPreview = document.getElementById('modal-jersey-preview');
+  const modalJerseyPosBadge = document.getElementById('modal-jersey-pos-badge');
 
-  // Real-time dorsal duplication check
+  function updateModalJerseyPreview() {
+    if (!modalJerseyPreview) return;
+    const rawNum = inputPlayerNumber.value.trim();
+    const num = rawNum !== '' ? rawNum : '-';
+    const pos = inputPlayerPosition.value || 'Ala';
+    modalJerseyPreview.innerHTML = createJerseySvg(num, pos);
+
+    const isPortera = (pos || '').trim().toLowerCase().includes('porter');
+    if (modalJerseyPosBadge) {
+      if (isPortera) {
+        modalJerseyPosBadge.textContent = 'Camiseta Portera (Amarilla)';
+        modalJerseyPosBadge.style.color = '#F59E0B';
+      } else {
+        modalJerseyPosBadge.textContent = 'Camiseta Jugadora (Verde)';
+        modalJerseyPosBadge.style.color = 'var(--accent-training, #00E676)';
+      }
+    }
+  }
+
+  // Live preview listeners on position & number changes
+  inputPlayerPosition.addEventListener('change', updateModalJerseyPreview);
+  inputPlayerPosition.addEventListener('input', updateModalJerseyPreview);
+
+  // Real-time dorsal duplication check & preview update
   inputPlayerNumber.addEventListener('input', () => {
     const raw = inputPlayerNumber.value.trim();
     if (!raw) {
       if (playerNumberWarning) playerNumberWarning.style.display = 'none';
-      return;
+    } else {
+      const num = parseInt(raw, 10);
+      const curId = editPlayerId.value;
+      const duplicate = window.storageEngine.findPlayerByNumber(num, curId);
+      if (duplicate && playerNumberWarning) {
+        playerNumberWarning.textContent = `⚠️ El dorsal ${num} ya está en uso por ${duplicate.name}. Selecciona otro número de dorsal.`;
+        playerNumberWarning.style.display = 'block';
+      } else if (playerNumberWarning) {
+        playerNumberWarning.style.display = 'none';
+      }
     }
-    const num = parseInt(raw, 10);
-    const curId = editPlayerId.value;
-    const duplicate = window.storageEngine.findPlayerByNumber(num, curId);
-    if (duplicate && playerNumberWarning) {
-      playerNumberWarning.textContent = `⚠️ El dorsal ${num} ya está en uso por ${duplicate.name}. Selecciona otro número de dorsal.`;
-      playerNumberWarning.style.display = 'block';
-    } else if (playerNumberWarning) {
-      playerNumberWarning.style.display = 'none';
-    }
+    updateModalJerseyPreview();
   });
 
   btnAddPlayer.addEventListener('click', () => {
@@ -1345,6 +1377,7 @@
       inputPlayerNumber.value = '';
       inputPlayerPosition.value = 'Ala';
       if (playerNumberWarning) playerNumberWarning.style.display = 'none';
+      updateModalJerseyPreview();
       modalPlayerEdit.classList.add('active');
     });
   });
@@ -1356,8 +1389,28 @@
     editPlayerId.value = p.id;
     inputPlayerName.value = p.name;
     inputPlayerNumber.value = (p.number !== null && p.number !== undefined) ? p.number : '';
-    inputPlayerPosition.value = p.position || 'Ala';
+    
+    // Select matching position or dynamically append if custom
+    const targetPos = p.position || 'Ala';
+    let found = false;
+    for (let i = 0; i < inputPlayerPosition.options.length; i++) {
+      if (inputPlayerPosition.options[i].value.toLowerCase() === targetPos.toLowerCase()) {
+        inputPlayerPosition.selectedIndex = i;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = targetPos;
+      const isGk = targetPos.toLowerCase().includes('porter');
+      opt.textContent = `${targetPos} (${isGk ? 'Camiseta Amarilla' : 'Camiseta Verde'})`;
+      inputPlayerPosition.appendChild(opt);
+      inputPlayerPosition.value = targetPos;
+    }
+
     if (playerNumberWarning) playerNumberWarning.style.display = 'none';
+    updateModalJerseyPreview();
     modalPlayerEdit.classList.add('active');
   }
 
