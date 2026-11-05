@@ -1,5 +1,5 @@
 // Service Worker for IYANAPP - Planta14 Futsal Attendance PWA
-const CACHE_NAME = 'iyanapp-planta14-v5';
+const CACHE_NAME = 'iyanapp-planta14-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

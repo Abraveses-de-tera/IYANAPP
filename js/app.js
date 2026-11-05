@@ -939,7 +939,7 @@
 
     let html = '<table class="matrix-table">';
     html += '<thead><tr>';
-    html += '<th title="Jugadora">Jug.</th>';
+    html += '<th>Jugadora</th>';
 
     dates.forEach(d => {
       const s = allSessions[d];
@@ -952,11 +952,9 @@
 
     html += '<tbody>';
     players.forEach(p => {
-      // Shorten name if longer than 5 characters to maximize visible days on mobile screens
-      const shortName = p.name.length > 5 ? p.name.slice(0, 4) + '.' : p.name;
       const numLabel = p.number ? `<span class="matrix-player-num">${p.number}</span>` : '';
       html += '<tr>';
-      html += `<td title="${p.name} ${p.number ? `(#${p.number})` : ''} - ${p.position || 'Jugadora'}">${numLabel}<span class="matrix-player-name">${shortName}</span></td>`;
+      html += `<td title="${p.name} ${p.number ? `(#${p.number})` : ''} - ${p.position || 'Jugadora'}">${numLabel}<span class="matrix-player-name">${p.name}</span></td>`;
 
       dates.forEach(d => {
         const s = allSessions[d];

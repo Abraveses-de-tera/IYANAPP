@@ -822,7 +822,7 @@ body {
   padding: 4px 1px;
 }
 
-/* Sticky first column for player names - ultra compact to maximize visible days */
+/* Sticky first column for player names - shows complete name always */
 .matrix-table th:first-child,
 .matrix-table td:first-child {
   position: sticky;
@@ -833,25 +833,21 @@ body {
   color: var(--text-main);
   z-index: 12;
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.6);
-  width: 60px !important;
-  max-width: 65px !important;
-  min-width: 55px !important;
-  padding: 4px 5px !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 82px;
+  padding: 5px 8px !important;
   white-space: nowrap;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
 }
 
 .matrix-player-num {
-  font-size: 0.64rem;
+  font-size: 0.72rem;
   color: var(--accent-training);
   font-weight: 800;
-  margin-right: 2px;
+  margin-right: 4px;
 }
 
 .matrix-player-name {
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #FFFFFF;
 }
