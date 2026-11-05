@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>IYANAPP - Planta14 Futsal Femenino</title>
+
+  <!-- PWA Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IYANAPP">
+  <meta name="description" content="Control de asistencia a entrenamientos y partidos de fútbol sala femenino Planta14">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <img src="icons/logo-brand.png" alt="Planta14" class="brand-logo">
+      <div class="brand-info">
+        <h1>IYAN<span>APP</span></h1>
+        <p>Planta14 Futsal Femenino</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div id="sync-dot" class="sync-indicator synced" title="Estado de datos (Almacenamiento local / Firebase)"></div>
+      <button id="btn-toggle-auth" class="badge-mode locked" title="Cambiar modo de edición">
+        <span id="lock-icon">🔒</span>
+        <span id="lock-text">Consulta</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Views Container -->
+  <main id="app-main">
+
+    <!-- ========================================================
+         VIEW 1: CALENDAR
+         ======================================================== -->
+    <section id="view-calendar" class="view-container active">
+      <div class="calendar-controls">
+        <button id="btn-cal-prev" class="calendar-month-btn" aria-label="Mes anterior">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style="text-align: center;">
+          <div id="calendar-month-label" class="calendar-current-label">Octubre 2026</div>
+          <span class="season-tag">Temporada 2026 / 2027</span>
+        </div>
+        <button id="btn-cal-next" class="calendar-month-btn" aria-label="Mes siguiente">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Quick Season Month Selector -->
+      <div id="season-quick-jump" class="calendar-quick-jump"></div>
+
+      <!-- Calendar Grid Card -->
+      <div class="card" style="padding: 12px;">
+        <div class="calendar-weekdays">
+          <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
+
+        <!-- Legend -->
+        <div class="calendar-legend">
+          <div class="legend-item"><div class="legend-dot high"></div> ≥80% Alta</div>
+          <div class="legend-item"><div class="legend-dot medium"></div> 50-79% Media</div>
+          <div class="legend-item"><div class="legend-dot low"></div> &lt;50% Baja</div>
+          <div class="legend-item"><div class="legend-dot pending"></div> Pendiente</div>
+        </div>
+      </div>
+
+      <!-- Quick Selected Day Preview -->
+      <div id="cal-selected-preview" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <span id="preview-type-pill" class="session-type-pill training">🏃 Entrenamiento</span>
+            <div id="preview-date-label" style="font-size: 0.95rem; font-weight: 800; margin-top: 6px;">Jueves, 1 de Octubre de 2026</div>
+          </div>
+          <div id="preview-rate-badge" style="font-size: 1.1rem; font-weight: 800; color: var(--accent-training);">-%</div>
+        </div>
+        <p id="preview-notes" style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px;">Sin registrar todavía.</p>
+        <button id="btn-open-selected-day" class="btn-block-action accent-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Abrir y Registrar Asistencia
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 2: DAY SESSION ATTENDANCE
+         ======================================================== -->
+    <section id="view-day" class="view-container">
+      <div class="session-header-card">
+        <div class="session-nav-row">
+          <button id="btn-session-prev" class="session-nav-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Anterior
+          </button>
+          <div id="session-type-badge" class="session-type-pill training">
+            🏃 Entrenamiento
+          </div>
+          <button id="btn-session-next" class="session-nav-btn">
+            Siguiente
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div id="session-date-title" class="session-date-display">
+          Jueves, 1 de Octubre de 2026
+        </div>
+
+        <!-- Attendance Stats Bar for this session -->
+        <div class="session-counter-bar">
+          <div class="counter-stat">
+            <span class="present" id="session-count-present">0</span> Asisten
+          </div>
+          <div class="counter-stat">
+            <span class="absent" id="session-count-absent">0</span> Ausentes
+          </div>
+          <div class="counter-stat" id="session-pct-display" style="color: var(--accent-training);">
+            0% Asistencia
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Bulk Actions -->
+      <div class="quick-attendance-actions">
+        <button id="btn-bulk-present" class="btn-quick-action btn-mark-all-present">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Todas Presentes
+        </button>
+        <button id="btn-bulk-absent" class="btn-quick-action btn-mark-all-absent">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Todas Ausentes
+        </button>
+      </div>
+
+      <!-- Player Attendance List -->
+      <div id="session-player-list" class="player-attendance-list"></div>
+
+      <!-- Match / Session Details Form -->
+      <div class="card">
+        <h3 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Detalles de la Sesión
+        </h3>
+        <div class="session-details-form">
+          <div class="form-group" id="group-session-type">
+            <label>Tipo de Sesión:</label>
+            <select id="input-session-type" class="form-select">
+              <option value="training">🏃 Entrenamiento</option>
+              <option value="match">⚽ Partido Oficial</option>
+              <option value="other">⭐ Extra / Amistoso</option>
+            </select>
+          </div>
+          <div class="form-group" id="group-match-opponent">
+            <label>Rival (Partidos):</label>
+            <input type="text" id="input-session-opponent" class="form-input" placeholder="Ej. Rodiezmo F.S., Soto del Barco...">
+          </div>
+          <div class="form-group" id="group-match-result">
+            <label>Resultado / Marcador:</label>
+            <input type="text" id="input-session-result" class="form-input" placeholder="Ej. Planta14 4 - 2 Rival">
+          </div>
+          <div class="form-group">
+            <label>Notas de la Sesión / Observaciones:</label>
+            <textarea id="input-session-notes" class="form-textarea" placeholder="Ej. Trabajo de defensa individual, jugadas de estrategia..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp Share Button -->
+      <button id="btn-share-session-whatsapp" class="btn-block-action accent-green" style="margin-bottom: 24px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Compartir Asistencia por WhatsApp
+      </button>
+    </section>
+
+    <!-- ========================================================
+         VIEW 3: TEAM MATRIX
+         ======================================================== -->
+    <section id="view-matrix" class="view-container">
+      <div class="card">
+        <h3 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Matriz de Asistencia (Jugadoras × Fechas)
+        </h3>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Desliza horizontalmente para ver las fechas de la temporada.
+        </p>
+
+        <!-- Filters -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+          <div>
+            <label style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Filtrar Mes:</label>
+            <select id="select-matrix-month" class="form-select" style="padding: 6px 8px; font-size: 0.8rem;"></select>
+          </div>
+          <div>
+            <label style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Tipo de Sesión:</label>
+            <select id="select-matrix-type" class="form-select" style="padding: 6px 8px; font-size: 0.8rem;">
+              <option value="all">Todos</option>
+              <option value="training">Entrenamientos</option>
+              <option value="match">Partidos</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="matrix-wrapper" class="matrix-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 4: STATISTICS
+         ======================================================== -->
+    <section id="view-stats" class="view-container">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 class="card-title" style="margin-bottom: 0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Estadísticas de Asistencia
+          </h3>
+          <select id="select-stats-scope" class="form-select" style="width: auto; padding: 4px 10px; font-size: 0.75rem;">
+            <option value="all">Toda la temporada</option>
+            <option value="current">Mes actual</option>
+          </select>
+        </div>
+
+        <!-- Global Summary Grid -->
+        <div class="stats-summary-grid">
+          <div class="stat-box">
+            <span class="stat-box-title">Media Global Equipo</span>
+            <div id="stat-team-total" class="stat-box-value highlight-green">0%</div>
+            <span id="stat-sessions-count" class="stat-box-sub">0 sesiones registradas</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-title">Asistencia Entrenos</span>
+            <div id="stat-team-trainings" class="stat-box-value highlight-green">0%</div>
+            <span id="stat-trainings-count" class="stat-box-sub">0 entrenamientos</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-title">Asistencia Partidos</span>
+            <div id="stat-team-matches" class="stat-box-value highlight-amber">0%</div>
+            <span id="stat-matches-count" class="stat-box-sub">0 partidos oficiales</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-box-title">Jugadoras en Plantilla</span>
+            <div id="stat-active-players" class="stat-box-value">13</div>
+            <span class="stat-box-sub">Planta14 Futsal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Rankings -->
+      <h3 style="font-size: 0.95rem; font-weight: 800; margin: 16px 0 10px 4px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+        Ranking de Jugadoras
+      </h3>
+      <div id="stats-player-rankings"></div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 5: SETTINGS & EXPORT
+         ======================================================== -->
+    <section id="view-settings" class="view-container">
+
+      <!-- Roster Management Card -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 class="card-title" style="margin-bottom: 0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Plantilla de Jugadoras
+          </h3>
+          <button id="btn-add-player" class="btn-icon-small" style="color: var(--accent-training); border-color: var(--accent-training);">
+            + Nueva Jugadora
+          </button>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 10px;">
+          Puedes editar el dorsal, nombre o desactivar sin borrar su historial pasado.
+        </p>
+        <div id="roster-manage-list" style="border: 1px solid var(--border-subtle); border-radius: 10px; overflow: hidden;"></div>
+      </div>
+
+      <!-- Export Card -->
+      <div class="card">
+        <h3 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportación de Asistencias
+        </h3>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Exporta todos los datos a Excel (.xlsx) con resumen y matriz completa o a CSV.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div>
+            <label style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Fecha inicio:</label>
+            <input type="date" id="export-date-start" class="form-input" value="2026-10-01">
+          </div>
+          <div>
+            <label style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">Fecha fin:</label>
+            <input type="date" id="export-date-end" class="form-input" value="2027-07-31">
+          </div>
+        </div>
+
+        <button id="btn-export-excel" class="btn-block-action accent-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Exportar a Excel (.xlsx)
+        </button>
+
+        <button id="btn-export-csv" class="btn-block-action">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar a CSV
+        </button>
+      </div>
+
+      <!-- Backup JSON Card -->
+      <div class="card">
+        <h3 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Copia de Seguridad (Backup)
+        </h3>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Guarda o restaura una copia completa de todas las sesiones y jugadoras.
+        </p>
+        <button id="btn-export-json" class="btn-block-action">
+          Descargar Copia de Seguridad (JSON)
+        </button>
+        <input type="file" id="input-import-json" accept=".json" style="display: none;">
+        <button id="btn-import-json-trigger" class="btn-block-action" style="margin-bottom: 0;">
+          Restaurar Copia desde Archivo
+        </button>
+      </div>
+
+      <!-- Security PIN Card -->
+      <div class="card">
+        <h3 class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Seguridad y PIN de Entrenadora
+        </h3>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+          El PIN protege la edición para que solo la entrenadora o delegada pueda modificar asistencias. PIN inicial por defecto: <strong>1414</strong>.
+        </p>
+        <button id="btn-change-pin-prompt" class="btn-block-action">
+          Cambiar PIN de Seguridad
+        </button>
+      </div>
+
+      <!-- Firebase Cloud Sync Card -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="card-title" style="margin-bottom: 0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+            Sincronización en la Nube (Firebase)
+          </h3>
+          <span id="firebase-status-badge" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted);">Local</span>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Permite que todas las jugadoras y cuerpo técnico vean las asistencias sincronizadas en tiempo real desde sus propios móviles.
+        </p>
+        <button id="btn-open-firebase-modal" class="btn-block-action accent-blue">
+          Configurar Firebase Firestore
+        </button>
+      </div>
+
+      <div style="text-align: center; padding: 12px; font-size: 0.7rem; color: var(--text-muted);">
+        IYANAPP v1.0.0 &bull; Planta14 Futsal Femenino &bull; 2026/2027
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       BOTTOM NAVIGATION BAR
+       ======================================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-view="view-calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Calendario</span>
+    </button>
+    <button class="nav-tab" data-view="view-day">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Sesión</span>
+    </button>
+    <button class="nav-tab" data-view="view-matrix">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <span>Equipo</span>
+    </button>
+    <button class="nav-tab" data-view="view-stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Estadísticas</span>
+    </button>
+    <button class="nav-tab" data-view="view-settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================
+       MODAL 1: PIN UNLOCK
+       ======================================================== -->
+  <div id="modal-pin" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">🔐 Modo Entrenadora</h3>
+        <button class="btn-modal-close" data-close-modal>&times;</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">
+        Introduce el PIN de 4 dígitos para editar asistencias. (Por defecto: <strong>1414</strong>)
+      </p>
+
+      <div class="pin-display-dots">
+        <div class="pin-dot" id="pindot-0"></div>
+        <div class="pin-dot" id="pindot-1"></div>
+        <div class="pin-dot" id="pindot-2"></div>
+        <div class="pin-dot" id="pindot-3"></div>
+      </div>
+
+      <div class="pin-pad-grid">
+        <button class="pin-key" data-pin="1">1</button>
+        <button class="pin-key" data-pin="2">2</button>
+        <button class="pin-key" data-pin="3">3</button>
+        <button class="pin-key" data-pin="4">4</button>
+        <button class="pin-key" data-pin="5">5</button>
+        <button class="pin-key" data-pin="6">6</button>
+        <button class="pin-key" data-pin="7">7</button>
+        <button class="pin-key" data-pin="8">8</button>
+        <button class="pin-key" data-pin="9">9</button>
+        <button class="pin-key" id="btn-pin-clear" style="font-size: 0.9rem; color: var(--text-secondary);">BORRAR</button>
+        <button class="pin-key" data-pin="0">0</button>
+        <button class="pin-key" id="btn-pin-backspace" style="font-size: 1.1rem;">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: PLAYER REASON / NOTE
+       ======================================================== -->
+  <div id="modal-player-note" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title" id="note-modal-title">Motivo de Falta</h3>
+        <button class="btn-modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+        <button class="jump-pill" data-quick-reason="Lesión">🤕 Lesión</button>
+        <button class="jump-pill" data-quick-reason="Trabajo">💼 Trabajo</button>
+        <button class="jump-pill" data-quick-reason="Estudios / Examen">📚 Estudios</button>
+        <button class="jump-pill" data-quick-reason="Enfermedad">🤒 Enfermedad</button>
+        <button class="jump-pill" data-quick-reason="Viaje">✈️ Viaje</button>
+        <button class="jump-pill" data-quick-reason="Motivos personales">⚠️ Personal</button>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label>Observación o detalle:</label>
+        <input type="text" id="input-player-note-text" class="form-input" placeholder="Ej. Esguince de tobillo en recuperación">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button id="btn-clear-player-note" class="btn-block-action" style="margin-bottom: 0;">Quitar Nota</button>
+        <button id="btn-save-player-note" class="btn-block-action accent-green" style="margin-bottom: 0;">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 3: ADD / EDIT PLAYER
+       ======================================================== -->
+  <div id="modal-player-edit" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title" id="player-modal-heading">Jugadora</h3>
+        <button class="btn-modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <input type="hidden" id="edit-player-id">
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label>Nombre:</label>
+        <input type="text" id="input-player-name" class="form-input" placeholder="Nombre de la jugadora">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label>Dorsal (Opcional):</label>
+        <input type="number" id="input-player-number" class="form-input" placeholder="Ej. 7" min="1" max="99">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label>Posición:</label>
+        <select id="input-player-position" class="form-select">
+          <option value="Portera">Portera</option>
+          <option value="Cierre">Cierre</option>
+          <option value="Ala">Ala</option>
+          <option value="Pívot">Pívot</option>
+          <option value="Universal">Universal</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button class="btn-block-action" data-close-modal style="margin-bottom: 0;">Cancelar</button>
+        <button id="btn-save-player-data" class="btn-block-action accent-green" style="margin-bottom: 0;">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 4: WHATSAPP SHARE CARD & PREVIEW
+       ======================================================== -->
+  <div id="modal-whatsapp-share" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">Compartir Convocatoria</h3>
+        <button class="btn-modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <!-- High-contrast WhatsApp Card Render Target -->
+      <div id="whatsapp-render-target" class="whatsapp-preview-card">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+          <img src="icons/logo-brand.png" alt="Planta14" style="width: 32px; height: 32px; background: #FFF; border-radius: 6px; padding: 2px;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #FFF;">PLANTA 14 FUTSAL</div>
+            <div id="wa-card-type" style="font-size: 0.72rem; color: var(--accent-training); font-weight: 700;">CONVOCATORIA</div>
+          </div>
+        </div>
+
+        <div id="wa-card-date" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px;"></div>
+        <div id="wa-card-matchinfo" style="font-size: 0.78rem; color: var(--accent-match); margin-bottom: 8px;"></div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 0.75rem;">
+          <div style="background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 8px; padding: 8px;">
+            <div style="font-weight: 800; color: var(--accent-training); margin-bottom: 4px;" id="wa-card-present-title">✅ ASISTEN (0)</div>
+            <div id="wa-card-present-list" style="line-height: 1.4;"></div>
+          </div>
+          <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 8px;">
+            <div style="font-weight: 800; color: var(--accent-danger); margin-bottom: 4px;" id="wa-card-absent-title">❌ BAJAS (0)</div>
+            <div id="wa-card-absent-list" style="line-height: 1.4;"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px; font-size: 0.75rem; text-align: right; color: var(--text-secondary);" id="wa-card-total-stat">
+          Asistencia: 0%
+        </div>
+      </div>
+
+      <button id="btn-wa-send-text" class="btn-block-action accent-green">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Enviar Mensaje a WhatsApp
+      </button>
+
+      <button id="btn-wa-download-image" class="btn-block-action">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Descargar Imagen para WhatsApp
+      </button>
+
+      <button id="btn-wa-copy-text" class="btn-block-action" style="margin-bottom: 0;">
+        Copiar Texto al Portapapeles
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 5: FIREBASE SETUP
+       ======================================================== -->
+  <div id="modal-firebase" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">Configuración Firebase</h3>
+        <button class="btn-modal-close" data-close-modal>&times;</button>
+      </div>
+
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 10px;">
+        Pega a continuación el objeto de configuración de tu proyecto Firebase (Firestore):
+      </p>
+
+      <div class="form-group" style="margin-bottom: 10px;">
+        <textarea id="input-firebase-json" class="form-textarea" style="height: 120px; font-family: monospace; font-size: 0.75rem;" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "tu-proyecto.firebaseapp.com",
+  "projectId": "tu-proyecto",
+  "storageBucket": "tu-proyecto.appspot.com",
+  "messagingSenderId": "...",
+  "appId": "..."
+}'></textarea>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 12px;">
+        <strong>Instrucciones rápidas:</strong><br>
+        1. Entra en <a href="https://console.firebase.google.com" target="_blank" style="color: var(--accent-info);">console.firebase.google.com</a> y crea un proyecto gratuito.<br>
+        2. Añade una aplicación Web y copia las credenciales de Firebase SDK.<br>
+        3. En el menú izquierdo, activa <strong>Cloud Firestore</strong> en modo de prueba (o reglas de lectura/escritura).
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button id="btn-disconnect-firebase" class="btn-block-action" style="margin-bottom: 0;">Desconectar</button>
+        <button id="btn-save-firebase-config" class="btn-block-action accent-blue" style="margin-bottom: 0;">Conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SCRIPTS & LIBS
+       ======================================================== -->
+  <!-- SheetJS for Excel (.xlsx) Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas for WhatsApp Image Export -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <!-- Firebase Compat SDK for optional real-time cloud sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Core App Modules -->
+  <script src="js/storage.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('IYANAPP Service Worker registrado con éxito:', reg.scope))
+          .catch(err => console.warn('Error registrando Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>

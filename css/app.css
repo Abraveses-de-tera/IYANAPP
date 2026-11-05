@@ -1,0 +1,1183 @@
+/* ==========================================================================
+   IYANAPP - Planta14 Futsal Mobile PWA Styles
+   OLED Pure Black Dark Theme with High-Contrast Sports Accents
+   ========================================================================== */
+
+:root {
+  --bg-pure-black: #000000;
+  --bg-card: #10141d;
+  --bg-card-hover: #161b26;
+  --bg-card-active: #1d2332;
+  --border-subtle: #202738;
+  --border-focus: #3b82f6;
+
+  /* Sports Color Accents */
+  --accent-training: #00E676; /* Electric Volt Green */
+  --accent-training-glow: rgba(0, 230, 118, 0.25);
+  --accent-match: #F59E0B; /* Golden Amber / Matchday */
+  --accent-match-glow: rgba(245, 158, 11, 0.25);
+  --accent-danger: #EF4444; /* Bright Red / Absence */
+  --accent-danger-glow: rgba(239, 68, 68, 0.25);
+  --accent-info: #38BDF8;
+
+  /* Typography */
+  --text-main: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* UI Dimensions */
+  --header-height: 60px;
+  --nav-height: 65px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-pure-black);
+  color: var(--text-main);
+  font-family: var(--font-stack);
+  overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(var(--header-height) + var(--safe-top));
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+  user-select: none;
+}
+
+/* ==========================================================================
+   Top Header Bar
+   ========================================================================== */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--header-height) + var(--safe-top));
+  padding-top: var(--safe-top);
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  z-index: 100;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  padding: 2px;
+  object-fit: contain;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.brand-info h1 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.brand-info h1 span {
+  color: var(--accent-training);
+}
+
+.brand-info p {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.badge-mode.locked {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-secondary);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.badge-mode.unlocked {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--accent-training);
+  border-color: rgba(0, 230, 118, 0.35);
+  box-shadow: 0 0 8px var(--accent-training-glow);
+}
+
+.sync-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.sync-indicator.synced {
+  background: var(--accent-training);
+  box-shadow: 0 0 6px var(--accent-training);
+}
+.sync-indicator.error {
+  background: var(--accent-danger);
+}
+
+/* ==========================================================================
+   Bottom Navigation Bar
+   ========================================================================== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(8, 10, 15, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 600;
+  gap: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 58px;
+}
+
+.nav-tab svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+  transition: transform 0.2s ease, stroke 0.2s ease;
+}
+
+.nav-tab.active {
+  color: var(--accent-training);
+}
+
+.nav-tab.active svg {
+  stroke: var(--accent-training);
+  transform: translateY(-2px);
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: calc(var(--safe-bottom) + 2px);
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent-training);
+  box-shadow: 0 0 8px var(--accent-training);
+}
+
+/* ==========================================================================
+   Main Content Views
+   ========================================================================== */
+.view-container {
+  display: none;
+  padding: 16px;
+  max-width: 540px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.view-container.active {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Common Card */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   View 1: Calendar
+   ========================================================================== */
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.calendar-month-btn {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.calendar-month-btn:active {
+  background: var(--bg-card-active);
+  transform: scale(0.95);
+}
+
+.calendar-current-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.season-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.calendar-quick-jump {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.calendar-quick-jump::-webkit-scrollbar {
+  display: none;
+}
+
+.jump-pill {
+  flex-shrink: 0;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.jump-pill.active {
+  background: rgba(0, 230, 118, 0.18);
+  border-color: var(--accent-training);
+  color: var(--accent-training);
+}
+
+/* Calendar Grid */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 2px 4px 2px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s;
+}
+
+.cal-day:active {
+  transform: scale(0.94);
+}
+
+.cal-day.other-month {
+  opacity: 0.25;
+}
+
+.cal-day.selected {
+  border-color: #FFFFFF !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.cal-day.today {
+  border-color: var(--accent-info) !important;
+  font-weight: 800;
+}
+
+.cal-day-number {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Indicators on day cells */
+.cal-session-badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-top: 1px;
+}
+
+.cal-day.type-training {
+  border-bottom: 2px solid var(--accent-training);
+}
+
+.cal-day.type-training .cal-session-badge {
+  color: var(--accent-training);
+  background: rgba(0, 230, 118, 0.15);
+}
+
+.cal-day.type-match {
+  border-bottom: 2px solid var(--accent-match);
+}
+
+.cal-day.type-match .cal-session-badge {
+  color: var(--accent-match);
+  background: rgba(245, 158, 11, 0.15);
+}
+
+/* Attendance dots / pill */
+.cal-attendance-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: auto;
+}
+
+.cal-attendance-indicator.status-high {
+  background: var(--accent-training);
+  box-shadow: 0 0 5px var(--accent-training);
+}
+
+.cal-attendance-indicator.status-medium {
+  background: #FACC15;
+  box-shadow: 0 0 5px #FACC15;
+}
+
+.cal-attendance-indicator.status-low {
+  background: var(--accent-danger);
+  box-shadow: 0 0 5px var(--accent-danger);
+}
+
+.cal-attendance-indicator.status-unrecorded {
+  background: transparent;
+  border: 1px dashed var(--text-muted);
+}
+
+/* Calendar Legend */
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.high { background: var(--accent-training); }
+.legend-dot.medium { background: #FACC15; }
+.legend-dot.low { background: var(--accent-danger); }
+.legend-dot.pending { border: 1px dashed var(--text-muted); }
+
+/* ==========================================================================
+   View 2: Day Attendance View
+   ========================================================================== */
+.session-header-card {
+  background: linear-gradient(135deg, #10141d 0%, #161c28 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.session-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.session-nav-btn {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-nav-btn:active {
+  background: var(--bg-card-active);
+}
+
+.session-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.session-type-pill.training {
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--accent-training);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.session-type-pill.match {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-match);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.session-date-display {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+
+.session-counter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+}
+
+.counter-stat {
+  font-weight: 700;
+}
+.counter-stat span.present { color: var(--accent-training); }
+.counter-stat span.absent { color: var(--accent-danger); }
+
+/* Quick Action Buttons (Todas presentes / ausentes) */
+.quick-attendance-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.btn-quick-action {
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s, filter 0.15s;
+}
+
+.btn-quick-action:active {
+  transform: scale(0.97);
+}
+
+.btn-mark-all-present {
+  background: rgba(0, 230, 118, 0.18);
+  color: var(--accent-training);
+  border: 1px solid var(--accent-training);
+}
+
+.btn-mark-all-absent {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-danger);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+}
+
+/* Player Attendance List Rows */
+.player-attendance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.player-item-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s;
+}
+
+.player-item-row.is-present {
+  border-color: rgba(0, 230, 118, 0.4);
+  background: linear-gradient(90deg, rgba(0, 230, 118, 0.08) 0%, var(--bg-card) 100%);
+}
+
+.player-item-row.is-absent {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-card) 100%);
+}
+
+.player-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-number-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #1c2230;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  border: 1px solid var(--border-subtle);
+}
+
+.player-name-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.player-note-label {
+  font-size: 0.72rem;
+  color: #F87171;
+  display: block;
+  margin-top: 2px;
+}
+
+.player-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Large Tactile Switch / Button */
+.btn-attendance-toggle {
+  min-width: 96px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-attendance-toggle:active {
+  transform: scale(0.94);
+}
+
+.btn-attendance-toggle.present {
+  background: var(--accent-training);
+  color: #000000;
+  box-shadow: 0 0 10px var(--accent-training-glow);
+}
+
+.btn-attendance-toggle.absent {
+  background: #202636;
+  color: var(--accent-danger);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btn-attendance-toggle.unrecorded {
+  background: #161b26;
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+}
+
+.btn-player-note {
+  width: 38px;
+  height: 42px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-player-note.has-note {
+  color: #F59E0B;
+  border-color: #F59E0B;
+}
+
+/* Session Details Inputs (Notes, Rival, Result) */
+.session-details-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  background: #080A0F;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--accent-training);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ==========================================================================
+   View 3: Team Attendance Matrix
+   ========================================================================== */
+.matrix-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--bg-card);
+  max-width: 100%;
+  margin-top: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.matrix-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 600px;
+  font-size: 0.78rem;
+}
+
+.matrix-table th, .matrix-table td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.matrix-table th {
+  background: #141924;
+  color: var(--text-secondary);
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Sticky first column for player names */
+.matrix-table th:first-child,
+.matrix-table td:first-child {
+  position: sticky;
+  left: 0;
+  background: #141924;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-main);
+  z-index: 12;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
+}
+
+.matrix-cell-yes {
+  color: var(--accent-training);
+  font-weight: 800;
+}
+
+.matrix-cell-no {
+  color: var(--accent-danger);
+  font-weight: 800;
+}
+
+.matrix-cell-pending {
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   View 4: Statistics
+   ========================================================================== */
+.stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-box-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.stat-box-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 4px;
+  color: var(--text-main);
+}
+
+.stat-box-value.highlight-green {
+  color: var(--accent-training);
+}
+
+.stat-box-value.highlight-amber {
+  color: var(--accent-match);
+}
+
+.stat-box-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Player Ranking List */
+.player-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.stat-player-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-badge-rank {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.stat-total-rate {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.stat-total-rate.rate-high { color: var(--accent-training); }
+.stat-total-rate.rate-medium { color: #FACC15; }
+.stat-total-rate.rate-low { color: var(--accent-danger); }
+
+/* Progress Bars */
+.stat-progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #1c2230;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.stat-progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.stat-progress-bar-fill.rate-high { background: var(--accent-training); }
+.stat-progress-bar-fill.rate-medium { background: #FACC15; }
+.stat-progress-bar-fill.rate-low { background: var(--accent-danger); }
+
+.stat-breakdown-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.stat-breakdown-col {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.stat-breakdown-col span {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   View 5: Settings & Export
+   ========================================================================== */
+.btn-block-action {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  margin-bottom: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-block-action:active {
+  transform: scale(0.98);
+}
+
+.btn-block-action.accent-green {
+  background: rgba(0, 230, 118, 0.15);
+  border-color: var(--accent-training);
+  color: var(--accent-training);
+}
+
+.btn-block-action.accent-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--accent-match);
+  color: var(--accent-match);
+}
+
+.btn-block-action.accent-blue {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-info);
+  color: var(--accent-info);
+}
+
+/* WhatsApp Shareable Card (Hidden or In-DOM rendering target) */
+.whatsapp-preview-card {
+  background: #0B0E14;
+  border: 2px solid var(--accent-training);
+  border-radius: 16px;
+  padding: 16px;
+  color: #FFFFFF;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   Modals & Toasts
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 200;
+}
+
+.modal-overlay.active {
+  display: flex;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modal-sheet {
+  background: #11151F;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.btn-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  top: calc(var(--header-height) + var(--safe-top) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 300;
+  pointer-events: none;
+  width: 90%;
+  max-width: 360px;
+}
+
+.toast {
+  background: rgba(18, 24, 38, 0.95);
+  border: 1px solid var(--accent-training);
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  animation: toastIn 0.25s ease-out, toastOut 0.25s ease-in 2.5s forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+/* PIN Keypad for fast touch unlocking */
+.pin-pad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pin-key {
+  height: 52px;
+  background: #182030;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-main);
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pin-key:active {
+  background: var(--accent-training);
+  color: #000000;
+}
+
+.pin-display-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #242D40;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.15s ease;
+}
+
+.pin-dot.filled {
+  background: var(--accent-training);
+  border-color: var(--accent-training);
+  box-shadow: 0 0 8px var(--accent-training);
+}
+
+/* Player Manage List in Settings/Roster */
+.roster-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.roster-manage-item:last-child {
+  border-bottom: none;
+}
+
+.roster-manage-item.inactive {
+  opacity: 0.5;
+}
+
+.roster-manage-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-icon-small {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
